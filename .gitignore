@@ -1,3 +1,5 @@
-/bin/
-/data/
-/bin1/
+#database files
+*.dat
+
+# results files
+results/
