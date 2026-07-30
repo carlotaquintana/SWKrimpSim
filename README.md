@@ -13,6 +13,57 @@ Source code of the approach for a structural similarity of RDF graphs based on f
 
 + The [PythonCode folder](https://github.com/MaillPierre/SWKrimpSim/tree/master/pythonCode) contains the code used for the data analysis relative to our experiments.
 
+## Running the SLIM Docker image
+
+A Docker image is provided to execute the modified SLIM implementation without installing its dependencies.
+
+### Build the image
+
+```bash
+docker build -t swkrimpsim-slim .
+```
+
+### Run SLIM
+
+```bash
+docker run --rm --user $(id -u):$(id -g) -v "$(pwd)":/work swkrimpsim-slim <database_name>
+```
+
+where `<database_name>` is the name of the input dataset **without** the `.dat` extension. For example, if the input file is `WktEN.dat`, execute:
+
+```bash
+docker run --rm --user $(id -u):$(id -g) -v "$(pwd)":/work swkrimpsim-slim WktEN
+```
+
+The input `.dat` file must be located in the current working directory.
+
+### Output
+
+After the execution finishes, all generated files are stored in:
+
+```text
+results/<database_name>-output/
+```
+
+This directory contains the generated code table (`.ct`), reports (`.csv`), the converted database (`.db`), the database analysis file, and a copy of the input dataset.
+
+If the input database name contains dots (e.g., `my.dataset.v1.dat`), they are handled automatically during execution and restored in the output filenames.
+
+### Removing the Docker image
+
+If the Docker image is no longer needed, it can be removed with:
+
+```bash
+docker rmi swkrimpsim-slim
+```
+
+### Notes
+
+* The container is executed using the current user (`--user $(id -u):$(id -g)`), so the generated files can be modified or removed without administrator/root privileges.
+* The `--rm` option automatically removes the container after the execution finishes.
+* The current directory is mounted inside the container as `/work`, allowing the input datasets and output files to be shared with the host system.
+
+
 ## Citation
 
 To cite the structural similarity measure related to this approach:
