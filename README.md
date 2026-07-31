@@ -15,7 +15,7 @@ Source code of the approach for a structural similarity of RDF graphs based on f
 
 ## Running the SLIM Docker image
 
-A Docker image is provided to execute the modified SLIM implementation without installing its dependencies.
+A Docker image is provided to execute the complete workflow without installing Java, SLIM, or any additional dependencies. The container can start either from an already generated transaction database (`.dat`) or directly from an RDF dataset (`.nt`).
 
 ### Build the image
 
@@ -23,19 +23,52 @@ A Docker image is provided to execute the modified SLIM implementation without i
 docker build -t swkrimpsim-slim .
 ```
 
-### Run SLIM
+This command only needs to be executed once (or again after modifying the Dockerfile or the execution script).
+
+### Option 1: Run from a `.dat` database
 
 ```bash
 docker run --rm --user $(id -u):$(id -g) -v "$(pwd)":/work swkrimpsim-slim <database_name>
 ```
 
-where `<database_name>` is the name of the input dataset **without** the `.dat` extension. For example, if the input file is `WktEN.dat`, execute:
+where `<database_name>` is the dataset name **with or without** the `.dat` extension.
+
+Example:
 
 ```bash
 docker run --rm --user $(id -u):$(id -g) -v "$(pwd)":/work swkrimpsim-slim WktEN
 ```
 
-The input `.dat` file must be located in the current working directory.
+The file `WktEN.dat` must be located in the current working directory.
+
+### Option 2: Run from an RDF dataset (`.nt`)
+
+```bash
+docker run --rm --user $(id -u):$(id -g) \
+    -v "$(pwd)":/work \
+    swkrimpsim-slim <dataset.nt> <nP|nPT> [index.idx]
+```
+
+Parameters:
+
+- `dataset.nt` : RDF dataset in N-Triples format.
+- `nP` : build transactions using properties only.
+- `nPT` : build transactions using properties and types.
+- `index.idx` *(optional)* : existing index to reuse and update, or the name of a new index to create. If no name is given, it will assign a default one.
+
+Examples:
+
+Create a new index automatically:
+
+```bash
+docker run --rm --user $(id -u):$(id -g) -v "$(pwd)":/work swkrimpsim-slim dataset.nt nP
+```
+
+Reuse an existing index:
+
+```bash
+docker run --rm --user $(id -u):$(id -g) -v "$(pwd)":/work swkrimpsim-slim dataset.nt nPT conversionIndex.idx
+```
 
 ### Output
 
@@ -45,9 +78,14 @@ After the execution finishes, all generated files are stored in:
 results/<database_name>-output/
 ```
 
-This directory contains the generated code table (`.ct`), reports (`.csv`), the converted database (`.db`), the database analysis file, and a copy of the input dataset.
+Depending on the execution mode, this directory may contain:
 
-If the input database name contains dots (e.g., `my.dataset.v1.dat`), they are handled automatically during execution and restored in the output filenames.
+- the generated code table (`.ct`);
+- execution reports (`.csv`);
+- the converted SLIM database (`.db`);
+- the database analysis (`.db.analysis.txt`);
+- the transaction database (`.dat`);
+- the conversion index (`.idx`), if one was generated or updated.
 
 ### Removing the Docker image
 

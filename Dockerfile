@@ -4,7 +4,7 @@ WORKDIR /SWKrimpSim
 ENV SLIM_ROOT=/opt/slim
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends libgomp1 && \
+    apt-get install -y --no-install-recommends libgomp1 default-jre-headless && \
     rm -rf /var/lib/apt/lists/*
 
 COPY SlimBinSource-20120607.tar.gz .
@@ -18,6 +18,7 @@ RUN mkdir -p "${SLIM_ROOT}" && \
     chmod +x "${SLIM_ROOT}/bin/fic" "${SLIM_ROOT}/bin/fic-uint16"
 
 COPY CT-SLIM.sh .
+COPY SWPatternsCover.jar .
 RUN chmod +x CT-SLIM.sh
 
 ENTRYPOINT ["./CT-SLIM.sh"]
