@@ -91,7 +91,7 @@ if [[ $1 == *.nt ]]; then
 
 else
     # $1 is already a .dat database (with or without the extension written)
-    ORIGINAL_NAME="${1%.dat}"
+    ORIGINAL_NAME="$(basename "${1%.dat}")"
 fi
 
 
@@ -103,8 +103,10 @@ echo
 echo "Starting the SLIM compression process for $ORIGINAL_NAME"
 echo
 
+
 # Dots are replaced by underscores
 DATABASE_NAME="${ORIGINAL_NAME//./_}"
+DATABASE_NAME="${DATABASE_NAME//-/_}"
 
 INPUT_FILE="./${ORIGINAL_NAME}.dat"
 

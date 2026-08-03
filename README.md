@@ -44,9 +44,7 @@ The file `WktEN.dat` must be located in the current working directory.
 ### Option 2: Run from an RDF dataset (`.nt`)
 
 ```bash
-docker run --rm --user $(id -u):$(id -g) \
-    -v "$(pwd)":/work \
-    swkrimpsim-slim <dataset.nt> <nP|nPT> [index.idx]
+docker run --rm --user $(id -u):$(id -g) -v "$(pwd)":/work swkrimpsim-slim <dataset.nt> <nP|nPT> [index.idx]
 ```
 
 Parameters:
