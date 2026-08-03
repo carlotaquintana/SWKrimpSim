@@ -202,3 +202,18 @@ echo Done. All the results are in $OUTPUT_DIR
 
 # we clean the experiments directory
 rm -fr "$EXP_DIR"compress_ng/*
+
+###############################################################################
+# Decode Vreeken code table
+###############################################################################
+
+echo
+echo "Decoding Vreeken code table..."
+
+java -jar ./DecodeVreeken.jar "$ORIGINAL_NAME"
+
+if [[ $? -ne 0 ]]; then
+    echo "Code table decoding failed."
+    exit 1
+fi
+
