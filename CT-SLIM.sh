@@ -94,7 +94,7 @@ else
     ORIGINAL_NAME="$(basename "${1%.dat}")"
 fi
 
-
+sleep infinity
 
 ###############################################################################
 # SLIM compression

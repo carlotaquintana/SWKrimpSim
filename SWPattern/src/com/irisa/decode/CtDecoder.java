@@ -9,6 +9,13 @@ import java.util.Map;
 
 public class CtDecoder {
 
+    /**
+     * Decodes a Vreeken code table into the original item identifiers.
+     *
+     * @param input The Vreeken code table (.ct)
+     * @param output The decoded code table (.ct)
+     * @param conversion The mapping from Vreeken item identifiers to original item identifiers
+     */
     public static void decode(Path input, Path output, Map<Integer,Integer> conversion)
             throws IOException {
 

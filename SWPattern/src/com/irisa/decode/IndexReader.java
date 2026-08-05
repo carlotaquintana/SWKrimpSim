@@ -14,6 +14,8 @@ public class IndexReader {
      *
      * The last column is the original item identifier.
      * Everything before it is kept as the textual representation of the item.
+     * 
+     * @param index The index file (.idx)
      */
     public static Map<Integer, String> readIndex(Path index)
             throws IOException {

@@ -9,6 +9,14 @@ import java.util.Map;
 
 public class AnalysisReader {
 
+    /**
+     * Reads the Vreeken-to-original item identifier mapping stored
+     * in the database analysis file.
+     * 
+     *      Vreeken item id => original item id
+     * 
+     * @param analysis The database analysis file (.db.analysis.txt)
+     */
     public static Map<Integer,Integer> readConversionTable(Path analysis)
             throws IOException {
 
@@ -32,15 +40,13 @@ public class AnalysisReader {
 
             if(alphabet && line.contains("=>")) {
                 String[] parts = line.split("=>");
-                int oldId = Integer.parseInt(parts[0].trim());
-                int newId = Integer.parseInt(parts[1].trim().split("\\s+")[0]);
-                map.put(oldId, newId);
+                int vreekenItem = Integer.parseInt(parts[0].trim());
+                int ourItem = Integer.parseInt(parts[1].trim().split("\\s+")[0]);
+                map.put(vreekenItem, ourItem);
             }
 
         }
 
         return map;
-
     }
-
 }

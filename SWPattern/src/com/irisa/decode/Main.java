@@ -7,6 +7,11 @@ import java.util.Map;
 
 public class Main {
 
+    /**
+     * Main method for decoding a Vreeken code table into the original item identifiers.
+     *
+     * @param args The dataset name.
+     */
     public static void main(String[] args) {
 
         if (args.length != 1) {
