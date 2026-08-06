@@ -30,13 +30,4 @@ public class CtPattern {
     public boolean contains(int item) {
         return items.contains(item);
     }
-
-    public int size() {
-        return items.size();
-    }
-
-    @Override
-    public String toString() {
-        return items + " (" + usage + ", " + support + ")";
-    }
 }

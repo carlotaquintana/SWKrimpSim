@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class FPNode {
-    private int item;
+    private final int item;
     private long usage;
     private long support;
     private final int depth;
@@ -62,10 +62,5 @@ public class FPNode {
     public void addCounts(long usage, long support) {
         this.usage += usage;
         this.support += support;
-    }
-
-    @Override
-    public String toString() {
-        return "FPNode[item=" + item + ", usage=" + usage + ", support=" + support + ", depth=" + depth + "]";
     }
 }
