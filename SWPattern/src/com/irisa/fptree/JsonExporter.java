@@ -4,19 +4,20 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
+import java.util.Map;
 
 public class JsonExporter {
 
-    public static void export(FPNode root, Path output) throws IOException {
+    public static void export(FPNode root, Map<Integer, ItemTranslation> translations, Path output) throws IOException {
 
         StringBuilder json = new StringBuilder();
 
-        writeNode(root, json, 0);
+        writeNode(root, translations, json, 0);
 
         Files.writeString(output, json.toString());
     }
 
-    private static void writeNode(FPNode node,StringBuilder json, int depth) {
+    private static void writeNode(FPNode node, Map<Integer, ItemTranslation> translations, StringBuilder json, int depth) {
 
         indent(json, depth);
         json.append("{\n");
@@ -31,6 +32,21 @@ public class JsonExporter {
         }
 
         json.append(",\n");
+
+        if (!node.isRoot()) {
+
+            ItemTranslation translation = translations.get(node.getItem());
+
+            indent(json, depth + 1);
+            json.append("\"uri\": ")
+                .append(translation != null ? "\"" + translation.getURI() + "\"" : "null")
+                .append(",\n");
+
+            indent(json, depth + 1);
+            json.append("\"type\": ")
+                .append(translation != null ? "\"" + translation.getType() + "\"" : "null")
+                .append(",\n");
+        }
 
         indent(json, depth + 1);
         json.append("\"usage\": ")
@@ -52,7 +68,7 @@ public class JsonExporter {
 
             while (it.hasNext()) {
 
-                writeNode(it.next(), json, depth + 2);
+                writeNode(it.next(), translations, json, depth + 2);
 
                 if (it.hasNext()) {
                     json.append(",");

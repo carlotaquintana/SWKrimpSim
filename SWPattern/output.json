@@ -1,0 +1,220 @@
+{
+    "item": "ROOT",
+    "usage": 0,
+    "support": 0,
+    "children": [
+        {
+            "item": 15,
+            "uri": "http://example.org/ontology#hasPart",
+            "type": "OUT_PROPERTY",
+            "usage": 419,
+            "support": 2336,
+            "children": [
+                {
+                    "item": 16,
+                    "uri": "http://example.org/ontology#hasMember",
+                    "type": "IN_PROPERTY",
+                    "usage": 419,
+                    "support": 2336,
+                    "children": [
+                        {
+                            "item": 17,
+                            "uri": "http://example.org/ontology#isHeldBy, https://w3id.org/scholarlydata/ontology/conference-ontology.owl#Person",
+                            "type": "OUT_NEIGHBOUR_TYPE",
+                            "usage": 419,
+                            "support": 2336,
+                            "children": [
+                                {
+                                    "item": 18,
+                                    "uri": "http://example.org/ontology#hasRole",
+                                    "type": "OUT_PROPERTY",
+                                    "usage": 419,
+                                    "support": 2336,
+                                    "children": [
+                                        {
+                                            "item": 19,
+                                            "uri": "http://example.org/ontology#hasContent",
+                                            "type": "IN_PROPERTY",
+                                            "usage": 419,
+                                            "support": 2336,
+                                            "children": [
+                                                {
+                                                    "item": 22,
+                                                    "uri": "http://example.org/ontology#isAffiliatedWith, https://w3id.org/scholarlydata/ontology/conference-ontology.owl#Organisation",
+                                                    "type": "OUT_NEIGHBOUR_TYPE",
+                                                    "usage": 316,
+                                                    "support": 2233,
+                                                    "children": [
+                                                        {
+                                                            "item": 23,
+                                                            "uri": "http://example.org/ontology#hasAffiliation",
+                                                            "type": "OUT_PROPERTY",
+                                                            "usage": 213,
+                                                            "support": 2130,
+                                                            "children": [
+                                                                {
+                                                                    "item": 24,
+                                                                    "uri": "http://example.org/ontology#worksFor",
+                                                                    "type": "IN_PROPERTY",
+                                                                    "usage": 213,
+                                                                    "support": 2130,
+                                                                    "children": [
+                                                                        {
+                                                                            "item": 25,
+                                                                            "uri": "http://example.org/ontology#hasAuthor",
+                                                                            "type": "OUT_PROPERTY",
+                                                                            "usage": 213,
+                                                                            "support": 2130,
+                                                                            "children": [
+                                                                                {
+                                                                                    "item": 26,
+                                                                                    "uri": "http://example.org/ontology#isAuthorOf",
+                                                                                    "type": "IN_PROPERTY",
+                                                                                    "usage": 213,
+                                                                                    "support": 2130,
+                                                                                    "children": [
+                                                                                        {
+                                                                                            "item": 27,
+                                                                                            "uri": "http://example.org/ontology#hasSubmission, http://xmlns.com/foaf/0.1/Document",
+                                                                                            "type": "OUT_NEIGHBOUR_TYPE",
+                                                                                            "usage": 213,
+                                                                                            "support": 2130,
+                                                                                            "children": [
+                                                                                                {
+                                                                                                    "item": 28,
+                                                                                                    "uri": "http://example.org/ontology#hasReview",
+                                                                                                    "type": "OUT_PROPERTY",
+                                                                                                    "usage": 213,
+                                                                                                    "support": 2130,
+                                                                                                    "children": [
+                                                                                                        {
+                                                                                                            "item": 29,
+                                                                                                            "uri": "http://example.org/ontology#reviewedBy",
+                                                                                                            "type": "IN_PROPERTY",
+                                                                                                            "usage": 213,
+                                                                                                            "support": 2130,
+                                                                                                            "children": []
+                                                                                                        }
+                                                                                                    ]
+                                                                                                }
+                                                                                            ]
+                                                                                        }
+                                                                                    ]
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "item": 25,
+                                                            "uri": "http://example.org/ontology#hasAuthor",
+                                                            "type": "OUT_PROPERTY",
+                                                            "usage": 103,
+                                                            "support": 103,
+                                                            "children": [
+                                                                {
+                                                                    "item": 26,
+                                                                    "uri": "http://example.org/ontology#isAuthorOf",
+                                                                    "type": "IN_PROPERTY",
+                                                                    "usage": 103,
+                                                                    "support": 103,
+                                                                    "children": [
+                                                                        {
+                                                                            "item": 29,
+                                                                            "uri": "http://example.org/ontology#reviewedBy",
+                                                                            "type": "IN_PROPERTY",
+                                                                            "usage": 103,
+                                                                            "support": 103,
+                                                                            "children": [
+                                                                                {
+                                                                                    "item": 47,
+                                                                                    "uri": "http://example.org/ontology#hasChair",
+                                                                                    "type": "OUT_PROPERTY",
+                                                                                    "usage": 103,
+                                                                                    "support": 103,
+                                                                                    "children": [
+                                                                                        {
+                                                                                            "item": 56,
+                                                                                            "uri": "http://example.org/ontology#chairOf",
+                                                                                            "type": "IN_PROPERTY",
+                                                                                            "usage": 103,
+                                                                                            "support": 103,
+                                                                                            "children": []
+                                                                                        }
+                                                                                    ]
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "item": 23,
+                                                    "uri": "http://example.org/ontology#hasAffiliation",
+                                                    "type": "OUT_PROPERTY",
+                                                    "usage": 103,
+                                                    "support": 103,
+                                                    "children": [
+                                                        {
+                                                            "item": 24,
+                                                            "uri": "http://example.org/ontology#worksFor",
+                                                            "type": "IN_PROPERTY",
+                                                            "usage": 103,
+                                                            "support": 103,
+                                                            "children": [
+                                                                {
+                                                                    "item": 27,
+                                                                    "uri": "http://example.org/ontology#hasSubmission, http://xmlns.com/foaf/0.1/Document",
+                                                                    "type": "OUT_NEIGHBOUR_TYPE",
+                                                                    "usage": 103,
+                                                                    "support": 103,
+                                                                    "children": [
+                                                                        {
+                                                                            "item": 28,
+                                                                            "uri": "http://example.org/ontology#hasReview",
+                                                                            "type": "OUT_PROPERTY",
+                                                                            "usage": 103,
+                                                                            "support": 103,
+                                                                            "children": [
+                                                                                {
+                                                                                    "item": 44,
+                                                                                    "uri": "http://example.org/ontology#hasVenue",
+                                                                                    "type": "OUT_PROPERTY",
+                                                                                    "usage": 103,
+                                                                                    "support": 103,
+                                                                                    "children": [
+                                                                                        {
+                                                                                            "item": 53,
+                                                                                            "uri": "http://example.org/ontology#locatedAt",
+                                                                                            "type": "IN_PROPERTY",
+                                                                                            "usage": 103,
+                                                                                            "support": 103,
+                                                                                            "children": []
+                                                                                        }
+                                                                                    ]
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
