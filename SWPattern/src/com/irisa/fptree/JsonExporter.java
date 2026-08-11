@@ -72,7 +72,9 @@ public class JsonExporter {
 
     private static void indent(StringBuilder json, int depth) {
 
-        json.repeat("    ", Math.max(0, depth));
+        for (int i = 0; i < depth; i++) {
+            json.append("    ");
+        }
     }
 
 }

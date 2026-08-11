@@ -31,28 +31,12 @@ public class FPNode {
         return support;
     }
 
-    public int getDepth() {
-        return depth;
-    }
-
-    public FPNode getParent() {
-        return parent;
-    }
-
     public Collection<FPNode> getChildren() {
         return children.values();
     }
 
-    public boolean hasChildren() {
-        return !children.isEmpty();
-    }
-
     public boolean isRoot() {
         return parent == null;
-    }
-
-    public FPNode getChild(int item) {
-        return children.get(item);
     }
 
     public FPNode getOrCreateChild(int item) {

@@ -3,6 +3,7 @@ package com.irisa.fptree;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class FPTreeBuilder {
 
@@ -13,7 +14,7 @@ public class FPTreeBuilder {
         List<CtPattern> filtered = patterns.stream()
                 .filter(p -> p.contains(selectedItem))
                 .sorted(Comparator.comparingInt(CtPattern::getUsage).reversed())
-                .toList();
+                .collect(Collectors.toList());
 
         for (CtPattern pattern : filtered) {
 
