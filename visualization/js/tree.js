@@ -196,10 +196,6 @@ function renderTree(data, svg, g, zoomBehavior) {
         .domain([0, maxUsage])
         .interpolator(d3.interpolateRgbBasis([getVar("--accent-cold"), getVar("--accent-hot")]));
 
-    const treeLayout = d3.tree().nodeSize([NODE_SEP_Y, LEVEL_SEP_X]);
-
-    treeLayout(root);
-
     // Only render links between real nodes
     const realLinks = root.links().filter(l => l.source.depth > 0); // {source, target}
 

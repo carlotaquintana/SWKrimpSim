@@ -180,13 +180,18 @@ svg:active {
 
 #tooltip .row {
   display: flex;
-  justify-content: space-between;
+  justify-content:  flex-start;
   gap: 16px;
   margin-top: 2px;
 }
 
 #tooltip .row span:first-child {
   color: var(--text-dim);
+  flex: 0 0 110px;
+}
+
+#tooltip .row span:last-child {
+  text-align: left;
 }
 
 #tooltip .head {

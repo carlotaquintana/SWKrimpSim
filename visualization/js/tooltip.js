@@ -7,29 +7,41 @@ const tooltip = d3.select("#tooltip");
  * @param {Object} d - D3 hierarchy node
  */
 function showTooltip(event, d) {
-  tooltip
-    .html(`
-        <div class="head">${d.data.items.join(", ")}</div>
-        <div class="row">
-            <span>usage</span>
-            <span>${d.data.usage}</span>
-        </div>
-        <div class="row">
-            <span>support</span>
-            <span>${d.data.support}</span>
-        </div>
-        <div class="row">
-            <span>items in chain</span>
-            <span>${d.data.items.length}</span>
-        </div>
-        <div class="row">
-            <span>next branches</span>
-            <span>${d.children ? d.children.length : 0}</span>
-        </div>
-    `)
+    const itemsText = d.data.items.join(", ");
+    const urisText = d.data.uris.map(v => v ?? "?").join("<br>");
+    const typesText = d.data.types.map(v => v ?? "?").join("<br>");
+
+    tooltip
+        .html(`
+            <div class="head">${itemsText}</div>
+            <div class="row">
+                <span>uri</span>
+                <span>${urisText}</span>
+            </div>
+            <div class="row">
+                <span>type</span>
+                <span>${typesText}</span>
+            </div>
+            <div class="row">
+                <span>usage</span>
+                <span>${d.data.usage}</span>
+            </div>
+            <div class="row">
+                <span>support</span>
+                <span>${d.data.support}</span>
+            </div>
+            <div class="row">
+                <span>items in chain</span>
+                <span>${d.data.items.length}</span>
+            </div>
+            <div class="row">
+                <span>next branches</span>
+                <span>${d.children ? d.children.length : 0}</span>
+            </div>
+        `)
     .style("display", "block");
 
-  moveTooltip(event);
+    moveTooltip(event);
 }
 
 /**
