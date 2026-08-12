@@ -8,20 +8,20 @@ const tooltip = d3.select("#tooltip");
  */
 function showTooltip(event, d) {
     const itemsText = d.data.items.join(", ");
-    const urisText = d.data.uris.map(v => v ?? "?").join("<br>");
-    const typesText = d.data.types.map(v => v ?? "?").join("<br>");
+    const fullPatternText = d.data.items.map((item, i) => {
+        const uri = d.data.uris[i] ?? "?";
+        const type = d.data.types[i] ?? "?";
+        return `${item} &nbsp;&nbsp; ${uri} &nbsp;&nbsp; ${type}`;  
+    }).join("<br>");
 
     tooltip
         .html(`
             <div class="head">${itemsText}</div>
             <div class="row">
-                <span>uri</span>
-                <span>${urisText}</span>
+                <span>Patterns</span>
+                <span>${fullPatternText}</span>
             </div>
-            <div class="row">
-                <span>type</span>
-                <span>${typesText}</span>
-            </div>
+            <br>
             <div class="row">
                 <span>usage</span>
                 <span>${d.data.usage}</span>

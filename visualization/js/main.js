@@ -27,7 +27,7 @@ viewUriButton.addEventListener("click", () => {setViewMode("uri");});
  */ 
 function setViewMode(mode) { 
     viewMode = mode; 
-    updateClusterLabels(viewMode, g, currentTreeRoot); 
+    if (currentTreeRoot) updateClusterLabels(viewMode, g, currentTreeRoot); 
     updateViewModeButtons(); 
 }
 
