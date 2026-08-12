@@ -14,7 +14,7 @@ public class Main {
 
             System.out.println(
                 "Usage:\n" +
-                "java -jar FPTree.jar <ct-decoded.ct> <idx-file.idx> <selectedItem> <output.json>");
+                "java -jar FPTreeBuilder.jar <ct-decoded.ct> <idx-file.idx> <selectedItem> <output.json>");
 
             return;
         }
