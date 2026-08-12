@@ -29,8 +29,6 @@ public class IdxReader {
                 String line = s.trim();
                 if (line.isEmpty()) continue;
 
-                System.out.println("Processing line: " + line);
-
                 String[] tokens = line.split("\t");
 
                 String type = tokens[tokens.length - 2];

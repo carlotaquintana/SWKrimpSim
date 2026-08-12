@@ -214,3 +214,35 @@ svg:active {
   font-family: var(--sans);
   font-size: 15px;
 }
+
+#view-mode {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.view-mode-btn {
+  padding: 8px 11px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text-dim);
+  font-family: var(--sans);
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.view-mode-btn:hover {
+  border-color: var(--accent-cold);
+  color: var(--text);
+}
+
+.view-mode-btn.active {
+  background: var(--border);
+  border-color: var(--accent-cold);
+  color: var(--text);
+}

@@ -4,6 +4,7 @@
 *.idx
 *.nt
 *.ct
+*.json
 
 # results files
 
