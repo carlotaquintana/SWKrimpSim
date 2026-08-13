@@ -1,10 +1,15 @@
-const NODE_SEP_Y = 70;
-const LEVEL_SEP_X = 50;
+const NODE_SEP_Y_MIN = 70;
+const NODE_SEP_GAP = 30; // extra breathing room added on top of the tallest cluster
+const LEVEL_SEP_X = 60;
 
 const CHAR_WIDTH = 8.2;
 const CLUSTER_PAD_X = 22;
 const CLUSTER_HEIGHT = 44;
 const CLUSTER_MIN_WIDTH = 60;
+
+const LABEL_LINE_HEIGHT = 14;
+const LABEL_USAGE_GAP = 18;
+const CLUSTER_VPAD = 8; // padding 
 
 let currentTreeRoot = null;
 
@@ -43,51 +48,123 @@ function compress(node) {
 
 
 /**
+ * Returns the label that should be displayed inside a cluster,
+ * one entry per line, depending on the selected view mode
+ */
+function getClusterLabelLines(data, viewMode) {
+    switch (viewMode) {
+        case "type":
+            return data.types.filter(value => value != null);
+
+        case "uri":
+            return data.uris.map(value => value ?? "?");
+
+        case "item":
+        default:
+            return [data.items.join(",")];
+    }
+}
+
+
+/**
+ * Computes the vertical layout of a cluster's text content:
+ */
+function verticalLayout(lineCount) {
+
+    const lineYsRaw = Array.from(
+        { length: lineCount },
+        (_, i) => (i - (lineCount - 1) / 2) * LABEL_LINE_HEIGHT
+    );
+
+    const lastLineYRaw = lineYsRaw[lineCount - 1];
+    const usageYRaw = lastLineYRaw + LABEL_USAGE_GAP;
+
+    const topRaw = lineYsRaw[0] - LABEL_LINE_HEIGHT / 2 - CLUSTER_VPAD;
+    const bottomRaw = usageYRaw + LABEL_LINE_HEIGHT / 2 + CLUSTER_VPAD;
+
+    const rawHeight = bottomRaw - topRaw;
+    const height = Math.max(CLUSTER_HEIGHT, rawHeight);
+
+    const midpoint = (topRaw + bottomRaw) / 2;
+
+    return {
+        lineYs: lineYsRaw.map(y => y - midpoint),
+        usageY: usageYRaw - midpoint,
+        height
+    };
+}
+
+
+/**
  * Computes the width of a cluster based on:
- * - the displayed items
+ * - the longest displayed line
  * - usage
  * - support
  */
 function clusterWidth(d, viewMode = "item") {
-    const labelText = getClusterLabel(d.data, viewMode);
+    const lines = getClusterLabelLines(d.data, viewMode);
     const usageText = `u:${d.data.usage} s:${d.data.support}`;
 
-    const longest = Math.max(labelText.length, usageText.length);
+    const longestLine = Math.max(0, ...lines.map(line => line.length));
+    const longest = Math.max(longestLine, usageText.length);
 
     return Math.max(CLUSTER_MIN_WIDTH, longest * CHAR_WIDTH + CLUSTER_PAD_X * 2);
 }
 
 
-/** 
- * Returns the label that should be displayed 
- * inside a cluster depending on the selected view mode
- */ 
-function getClusterLabel(data, viewMode) { 
-    switch (viewMode) { 
-        case "type": 
-            return data.types.filter(value => value != null).join(","); 
-        
-        case "uri": 
-            return data.uris.filter(value => value != null).join(","); 
+/**
+ * Computes the height of a cluster
+ */
+function clusterHeight(d, viewMode = "item") {
+    const lines = getClusterLabelLines(d.data, viewMode);
+    return verticalLayout(lines.length).height;
+}
 
-        case "item": 
-        default: 
-            return data.items.join(","); 
-    } 
+
+/**
+ * Renders the item-label <text> as one or more vertically stacked
+ * <tspan> lines and repositions the usage-label right below them.
+ */
+function renderClusterLabel(nodeGroupSelection, viewMode) {
+
+    nodeGroupSelection.each(function (d) {
+
+        const lines = getClusterLabelLines(d.data, viewMode);
+        const layout = verticalLayout(lines.length);
+        const sel = d3.select(this);
+
+        const itemLabel = sel.select("text.item-label");
+        itemLabel.selectAll("tspan").remove();
+
+        lines.forEach((line, i) => {
+            itemLabel.append("tspan")
+                .attr("x", 0)
+                .attr("y", layout.lineYs[i])
+                .text(line);
+        });
+
+        sel.select("text.usage-label")
+            .attr("y", layout.usageY)
+            .text(`u:${d.data.usage} s:${d.data.support}`);
+    });
 }
 
 
 /**
  * Recalculates the complete tree layout according to the
- * current cluster widths
+ * current cluster widths/heights
  */
 function updateTreeLayout(viewMode, root, g) {
 
     root.each(d => {
         d.clusterWidth = clusterWidth(d, viewMode);
+        d.clusterHeight = clusterHeight(d, viewMode);
     });
 
-    const treeLayout = d3.tree().nodeSize([NODE_SEP_Y, LEVEL_SEP_X]);
+    const maxClusterHeight = d3.max(root.descendants(), d => d.clusterHeight) || CLUSTER_HEIGHT;
+    const nodeSepY = Math.max(NODE_SEP_Y_MIN, maxClusterHeight + NODE_SEP_GAP);
+
+    const treeLayout = d3.tree().nodeSize([nodeSepY, LEVEL_SEP_X]);
 
     treeLayout(root);
 
@@ -132,7 +209,9 @@ function updateTreeLayout(viewMode, root, g) {
 
     g.selectAll("rect.cluster")
         .attr("x", d => -clusterWidth(d, viewMode) / 2)
-        .attr("width", d => clusterWidth(d, viewMode));
+        .attr("y", d => -clusterHeight(d, viewMode) / 2)
+        .attr("width", d => clusterWidth(d, viewMode))
+        .attr("height", d => clusterHeight(d, viewMode));
 
     const linkGenerator = d3.linkHorizontal().x(d => d.y).y(d => d.x);
 
@@ -163,8 +242,7 @@ function updateTreeLayout(viewMode, root, g) {
  */
 function updateClusterLabels(viewMode, g, root) {
 
-    g.selectAll("text.item-label").text(d => getClusterLabel(d.data, viewMode));
-
+    renderClusterLabel(g.selectAll("g.node"), viewMode);
     updateTreeLayout(viewMode, root, g);
 }
 
@@ -173,7 +251,7 @@ function updateClusterLabels(viewMode, g, root) {
  * Renders the tree given the root node data
  * The root node is a virtual node that has all the independent groups as children
  */
-function renderTree(data, svg, g, zoomBehavior) {
+function renderTree(data, svg, g, zoomBehavior, viewMode) {
 
     document.getElementById("empty-state").style.display = "none";
     svg.style("display", "block");
@@ -196,26 +274,15 @@ function renderTree(data, svg, g, zoomBehavior) {
         .domain([0, maxUsage])
         .interpolator(d3.interpolateRgbBasis([getVar("--accent-cold"), getVar("--accent-hot")]));
 
-    // Only render links between real nodes
+    // only render links between real nodes
     const realLinks = root.links().filter(l => l.source.depth > 0); // {source, target}
-
-    const linkGenerator = d3.linkHorizontal().x(d => d.y).y(d => d.x); // horizontal links
-
 
     g.append("g")
         .attr("class", "links")
         .selectAll("path")
         .data(realLinks)
         .join("path")
-        .attr("class", "link")
-        .attr("d", d => {
-            const sw = clusterWidth(d.source, viewMode) / 2;
-            const tw = clusterWidth(d.target, viewMode) / 2;
-            return linkGenerator({
-                source: { x: d.source.x, y: d.source.y + sw },
-                target: { x: d.target.x, y: d.target.y - tw }
-            });
-        });
+        .attr("class", "link");
 
     const nodeGroup = g.append("g")
         .attr("class", "nodes")
@@ -223,17 +290,12 @@ function renderTree(data, svg, g, zoomBehavior) {
         .data(realNodes)
         .join("g")
         .attr("class", "node")
-        .attr("transform", d => `translate(${d.y},${d.x})`)
         .on("mouseenter", showTooltip)
         .on("mousemove", moveTooltip)
         .on("mouseleave", hideTooltip);
 
     nodeGroup.append("rect")
         .attr("class", "cluster")
-        .attr("x", d => -clusterWidth(d, viewMode) / 2)
-        .attr("y", -CLUSTER_HEIGHT / 2)
-        .attr("width", d => clusterWidth(d, viewMode))
-        .attr("height", CLUSTER_HEIGHT)
         .attr("rx", CLUSTER_HEIGHT / 2)
         .attr("ry", CLUSTER_HEIGHT / 2)
         .attr("fill", d => colorScale(d.data.usage))
@@ -241,17 +303,14 @@ function renderTree(data, svg, g, zoomBehavior) {
         .attr("stroke", d => colorScale(d.data.usage));
 
     nodeGroup.append("text")
-        .attr("class", "item-label")
-        .attr("y", -7)
-        .text(d => getClusterLabel(d.data, viewMode));
+        .attr("class", "item-label");
 
     nodeGroup.append("text")
-        .attr("class", "usage-label")
-        .attr("y", 11)
-        .text(d => `u:${d.data.usage} s:${d.data.support}`);
+        .attr("class", "usage-label");
 
+    renderClusterLabel(nodeGroup, viewMode);
 
-    // Center the initial view on the first group
+    // center the initial view on the first group
     const initialTransform = d3.zoomIdentity.translate(60, window.innerHeight / 2 - 56).scale(1);
     svg.call(zoomBehavior.transform, initialTransform);
 
