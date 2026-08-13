@@ -1,5 +1,5 @@
 const NODE_SEP_Y_MIN = 70;
-const NODE_SEP_GAP = 30; // extra breathing room added on top of the tallest cluster
+const NODE_SEP_GAP = 30; 
 const LEVEL_SEP_X = 60;
 
 const CHAR_WIDTH = 8.2;
@@ -9,7 +9,7 @@ const CLUSTER_MIN_WIDTH = 60;
 
 const LABEL_LINE_HEIGHT = 14;
 const LABEL_USAGE_GAP = 18;
-const CLUSTER_VPAD = 8; // padding 
+const CLUSTER_VPAD = 8;
 
 let currentTreeRoot = null;
 
