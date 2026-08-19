@@ -65,6 +65,7 @@ public class Main {
  
             FPTreeBuilder builder = new FPTreeBuilder();
             FPNode root = builder.build(patterns, selectedItem);
+            long maxSupport = builder.getMaxSupport();
  
             JsonExporter.export(root, translations, output);
  

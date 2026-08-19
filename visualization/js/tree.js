@@ -54,7 +54,7 @@ function compress(node) {
 function getClusterLabelLines(data, viewMode) {
     switch (viewMode) {
         case "type":
-            return data.types.filter(value => value != null);
+            return data.types.filter(value => value ?? "?");
 
         case "uri":
             return data.uris.map(value => value ?? "?");
@@ -131,7 +131,7 @@ function renderClusterLabel(nodeGroupSelection, viewMode) {
 
         const lines = getClusterLabelLines(d.data, viewMode);
         const layout = verticalLayout(lines.length);
-        const sel = d3.select(this);
+        const sel = d3.select(this); // <g.node>
 
         const itemLabel = sel.select("text.item-label");
         itemLabel.selectAll("tspan").remove();
@@ -178,9 +178,7 @@ function updateTreeLayout(viewMode, root, g) {
     });
 
     const levelPositions = new Map();
-
     let currentY = 0;
-
     const maxDepth = d3.max(root.descendants(), d => d.depth) || 0;
 
     for (let depth = 0; depth <= maxDepth; depth++) {
@@ -188,11 +186,9 @@ function updateTreeLayout(viewMode, root, g) {
         const levelWidth = levelWidths.get(depth) || CLUSTER_MIN_WIDTH;
 
         if (depth === 0) {
-
             currentY = levelWidth / 2;
 
         } else {
-
             const previousWidth = levelWidths.get(depth - 1) || CLUSTER_MIN_WIDTH;
             currentY += previousWidth / 2 + LEVEL_SEP_X + levelWidth / 2;
         }
