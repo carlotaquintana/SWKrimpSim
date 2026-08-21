@@ -5,22 +5,19 @@ const fileInput = document.getElementById("file-input");
 const filename = document.getElementById("filename");
 const status = document.getElementById("status");
 
-const viewItemButton = document.getElementById("view-item-btn"); 
-const viewTypeButton = document.getElementById("view-type-btn"); 
-const viewUriButton = document.getElementById("view-uri-btn");
+const viewVreekenItemButton = document.getElementById("view-itemV-btn"); 
+const viewOriginalItemButton = document.getElementById("view-itemO-btn"); 
 
-let viewMode = "item"; // view mode: "item", "type" or "uri"
+let viewMode = "itemV"; // view mode: "itemV" or "itemO"
 
 function updateViewModeButtons() {
-    viewItemButton.classList.toggle("active", viewMode === "item");
-    viewTypeButton.classList.toggle("active", viewMode === "type");
-    viewUriButton.classList.toggle("active", viewMode === "uri");
+    viewVreekenItemButton.classList.toggle("active", viewMode === "itemV");
+    viewOriginalItemButton.classList.toggle("active", viewMode === "itemO");
 }
 
 
-viewItemButton.addEventListener("click", () => {setViewMode("item");});
-viewTypeButton.addEventListener("click", () => {setViewMode("type");});
-viewUriButton.addEventListener("click", () => {setViewMode("uri");});
+viewVreekenItemButton.addEventListener("click", () => {setViewMode("itemV");});
+viewOriginalItemButton.addEventListener("click", () => {setViewMode("itemO");});
 
 /**
  * Changes the current view mode

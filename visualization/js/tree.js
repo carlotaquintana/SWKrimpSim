@@ -21,11 +21,9 @@ let currentTreeRoot = null;
 function getClusterLabelLines(data, viewMode) {
     if (!data.details) return [data.items ? data.items.join(",") : ""];
     switch (viewMode) {
-        case "type":
+        case "itemO":
             return data.details.map(d => d.type ?? "?");
-        case "uri":
-            return data.details.map(d => d.uri ?? "?");
-        case "item":
+        case "itemV":
         default:
             return [data.items ? data.items.join(",") : ""];
     }
@@ -63,7 +61,7 @@ function verticalLayout(lineCount) {
 /**
  * Computes the width of a cluster
  */
-function clusterWidth(d, viewMode = "item") {
+function clusterWidth(d, viewMode = "itemV") {
     const lines = getClusterLabelLines(d, viewMode);
     const usageText = `usage:${d.usage}`;
 
@@ -76,7 +74,7 @@ function clusterWidth(d, viewMode = "item") {
 /**
  * Computes the height of a cluster
  */
-function clusterHeight(d, viewMode = "item") {
+function clusterHeight(d, viewMode = "itemV") {
     const lines = getClusterLabelLines(d, viewMode);
     return verticalLayout(lines.length).height;
 }
