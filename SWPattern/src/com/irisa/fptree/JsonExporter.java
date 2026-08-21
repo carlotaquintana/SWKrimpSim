@@ -69,7 +69,7 @@ public class JsonExporter {
             json.append("      \"details\": [\n");
             for (int j = 0; j < items.size(); j++) {
                 int item = items.get(j);
-                ItemTranslation tr = null; //translations.get(item);
+                ItemTranslation tr = translations.get(item);
                 json.append("        {\n");
                 json.append("          \"item\": ").append(item).append(",\n");
                 json.append("          \"uri\": ").append(tr != null ? "\"" + escapeJson(tr.getURI()) + "\"" : "null").append(",\n");
