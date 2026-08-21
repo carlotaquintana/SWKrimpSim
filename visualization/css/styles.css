@@ -4,6 +4,7 @@
   --border: #2a323b;
   --text: #d8dee5;
   --text-dim: #8b96a3;
+  --tooltip-head: #F7DCF5;
   --accent-cold: #5eead4;
   --accent-hot: #E39236;
   --mono: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Consolas, monospace;
@@ -195,7 +196,7 @@ svg:active {
 }
 
 #tooltip .head {
-  color: var(--accent-cold);
+  color: var(--tooltip-head);
   font-weight: 600;
   margin-bottom: 4px;
 }
