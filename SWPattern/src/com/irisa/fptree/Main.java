@@ -1,6 +1,5 @@
 package com.irisa.fptree;
 
-import java.io.IOException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.List;
@@ -65,7 +64,6 @@ public class Main {
  
             FPTreeBuilder builder = new FPTreeBuilder();
             FPNode root = builder.build(patterns, selectedItem);
-            long maxSupport = builder.getMaxSupport();
  
             JsonExporter.export(root, translations, output);
  

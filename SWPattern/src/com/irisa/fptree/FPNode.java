@@ -1,46 +1,71 @@
 package com.irisa.fptree;
 
 import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 public class FPNode {
-    private final int item;
+    private final List<Integer> items;
     private long usage;
     private long support;
-    private final int depth;
-    private final FPNode parent;
-    private final Map<Integer, FPNode> children = new LinkedHashMap<>();
+    private double normalizedUsage;
+    private final List<FPNode> children = new ArrayList<>();
 
 
-    public FPNode(int item, FPNode parent) {
-        this.item = item;
-        this.parent = parent;
-        this.depth = (parent == null) ? 0 : parent.depth + 1;
+    public FPNode(List<Integer> items) {
+        this.items = (items != null) ? new ArrayList<>(items) : Collections.emptyList();
+    }
+
+    public FPNode(int singleItem) {
+        this.items = new ArrayList<>();
+        if (singleItem != -1) {
+            this.items.add(singleItem);
+        }
+    }
+
+    public List<Integer> getItems() {
+        return items;
     }
 
     public int getItem() {
-        return item;
+        return items.isEmpty() ? -1 : items.get(0);
     }
 
     public long getUsage() {
         return usage;
     }
 
+    public void setUsage(long usage) {
+        this.usage = usage;
+    }
+
+    public double getNormalizedUsage() {
+        return normalizedUsage;
+    }
+
+    public void setNormalizedUsage(double normalizedUsage) {
+        this.normalizedUsage = normalizedUsage;
+    }
+
     public long getSupport() {
         return support;
     }
 
+    public void setSupport(long support) {
+        this.support = support;
+    }
+
     public Collection<FPNode> getChildren() {
-        return children.values();
+        return children;
+    }
+
+    public void addChild(FPNode child) {
+        if (!children.contains(child)) {
+            children.add(child);
+        }
     }
 
     public boolean isRoot() {
-        return parent == null;
-    }
-
-    public FPNode getOrCreateChild(int item) {
-        return children.computeIfAbsent(item, k -> new FPNode(k, this));
+        return items.isEmpty();
     }
 
     public void addCounts(long usage, long support) {

@@ -3,94 +3,103 @@ package com.irisa.fptree;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 public class JsonExporter {
 
     public static void export(FPNode root, Map<Integer, ItemTranslation> translations, Path output) throws IOException {
 
-        StringBuilder json = new StringBuilder();
+        List<FPNode> nodeList = new ArrayList<>();
+        Map<FPNode, String> nodeIds = new IdentityHashMap<>();
+        Set<String> linkSet = new LinkedHashSet<>();
+        List<String[]> linkList = new ArrayList<>();
 
-        writeNode(root, translations, json, 0);
+        Queue<FPNode> queue = new LinkedList<>();
+
+        for (FPNode startNode : root.getChildren()) {
+            if (!nodeIds.containsKey(startNode)) {
+                String id = "node_" + nodeList.size();
+                nodeIds.put(startNode, id);
+                nodeList.add(startNode);
+                queue.add(startNode);
+            }
+        }
+
+        while (!queue.isEmpty()) {
+            FPNode curr = queue.poll();
+            String currId = nodeIds.get(curr);
+
+            for (FPNode child : curr.getChildren()) {
+                if (!nodeIds.containsKey(child)) {
+                    String childId = "node_" + nodeList.size();
+                    nodeIds.put(child, childId);
+                    nodeList.add(child);
+                    queue.add(child);
+                }
+                String childId = nodeIds.get(child);
+                String linkKey = currId + "-" + childId;
+                if (linkSet.add(linkKey)) {
+                    linkList.add(new String[]{currId, childId});
+                }
+            }
+        }
+
+        StringBuilder json = new StringBuilder();
+        json.append("{\n");
+
+        // Nodes
+        json.append("  \"nodes\": [\n");
+        for (int i = 0; i < nodeList.size(); i++) {
+            FPNode node = nodeList.get(i);
+            String id = nodeIds.get(node);
+
+            json.append("    {\n");
+            json.append("      \"id\": \"").append(id).append("\",\n");
+
+            // Items in the compress patterns
+            json.append("      \"items\": [");
+            List<Integer> items = node.getItems();
+            for (int j = 0; j < items.size(); j++) {
+                json.append(items.get(j));
+                if (j < items.size() - 1) json.append(", ");
+            }
+            json.append("],\n");
+
+            // Item translation
+            json.append("      \"details\": [\n");
+            for (int j = 0; j < items.size(); j++) {
+                int item = items.get(j);
+                ItemTranslation tr = null; //translations.get(item);
+                json.append("        {\n");
+                json.append("          \"item\": ").append(item).append(",\n");
+                json.append("          \"uri\": ").append(tr != null ? "\"" + escapeJson(tr.getURI()) + "\"" : "null").append(",\n");
+                json.append("          \"type\": ").append(tr != null ? "\"" + escapeJson(tr.getType()) + "\"" : "null").append("\n");
+                json.append("        }").append(j < items.size() - 1 ? ",\n" : "\n");
+            }
+            json.append("      ],\n");
+            json.append("      \"rawUsage\": ").append(node.getUsage()).append(",\n");
+            json.append("      \"usage\": ").append(String.format(Locale.US, "%.6f", node.getNormalizedUsage())).append("\n");
+            json.append("    }").append(i < nodeList.size() - 1 ? ",\n" : "\n");
+        }
+        json.append("  ],\n");
+
+        // Links
+        json.append("  \"links\": [\n");
+        for (int i = 0; i < linkList.size(); i++) {
+            String[] link = linkList.get(i);
+            json.append("    {\n");
+            json.append("      \"source\": \"").append(link[0]).append("\",\n");
+            json.append("      \"target\": \"").append(link[1]).append("\"\n");
+            json.append("    }").append(i < linkList.size() - 1 ? ",\n" : "\n");
+        }
+        json.append("  ]\n");
+        json.append("}\n");
 
         Files.writeString(output, json.toString());
     }
 
-    private static void writeNode(FPNode node, Map<Integer, ItemTranslation> translations, StringBuilder json, int depth) {
-
-        indent(json, depth);
-        json.append("{\n");
-
-        indent(json, depth + 1);
-        json.append("\"item\": ");
-
-        if (node.isRoot()) {
-            json.append("\"ROOT\"");
-        } else {
-            json.append(node.getItem());
-        }
-
-        json.append(",\n");
-
-        if (!node.isRoot()) {
-
-            ItemTranslation translation = translations.get(node.getItem());
-
-            indent(json, depth + 1);
-            json.append("\"uri\": ")
-                .append(translation != null ? "\"" + translation.getURI() + "\"" : "null")
-                .append(",\n");
-
-            indent(json, depth + 1);
-            json.append("\"type\": ")
-                .append(translation != null ? "\"" + translation.getType() + "\"" : "null")
-                .append(",\n");
-        }
-
-        indent(json, depth + 1);
-        json.append("\"usage\": ")
-            .append(node.getUsage())
-            .append(",\n");
-
-        indent(json, depth + 1);
-        json.append("\"support\": ")
-            .append(node.getSupport())
-            .append(",\n");
-
-        indent(json, depth + 1);
-        json.append("\"children\": [");
-
-        if (!node.getChildren().isEmpty()) {
-            json.append("\n");
-
-            Iterator<FPNode> it = node.getChildren().iterator();
-
-            while (it.hasNext()) {
-
-                writeNode(it.next(), translations, json, depth + 2);
-
-                if (it.hasNext()) {
-                    json.append(",");
-                }
-
-                json.append("\n");
-            }
-
-            indent(json, depth + 1);
-        }
-
-        json.append("]\n");
-
-        indent(json, depth);
-        json.append("}");
+    private static String escapeJson(String input) {
+        if (input == null) return "";
+        return input.replace("\\", "\\\\").replace("\"", "\\\"");
     }
-
-    private static void indent(StringBuilder json, int depth) {
-
-        for (int i = 0; i < depth; i++) {
-            json.append("    ");
-        }
-    }
-
 }

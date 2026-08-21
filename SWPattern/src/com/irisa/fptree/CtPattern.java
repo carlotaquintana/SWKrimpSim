@@ -6,7 +6,7 @@ import java.util.List;
 
 public class CtPattern {
     private List<Integer> items;
-    private int usage;
+    private long usage;
     private int support;
 
     public CtPattern(List<Integer> items, int usage, int support) {
@@ -19,7 +19,7 @@ public class CtPattern {
         return Collections.unmodifiableList(items);
     }
 
-    public int getUsage() {
+    public long getUsage() {
         return usage;
     }
 
