@@ -1,73 +1,39 @@
-const NODE_SEP_Y_MIN = 70;
-const NODE_SEP_GAP = 30; 
-const LEVEL_SEP_X = 60;
+const NODE_SEP_Y_MIN = 70; // min vertical gap between nodes in the same column
+const NODE_SEP_GAP = 30; // extra gap added to the tallest node's height
+const LEVEL_SEP_X = 60; // horizontal gap between columns
+const COMPONENT_GAP = 50; // vertical gap between disconnected graphs
 
-const CHAR_WIDTH = 8.2;
-const CLUSTER_PAD_X = 22;
-const CLUSTER_HEIGHT = 44;
-const CLUSTER_MIN_WIDTH = 60;
+const CHAR_WIDTH = 8.2; // approx width in px of one text character
+const CLUSTER_PAD_X = 22; // horizontal padding inside a node box
+const CLUSTER_MIN_HEIGHT = 44; // minimum box height
+const CLUSTER_MIN_WIDTH = 60; // minimum box width
 
-const LABEL_LINE_HEIGHT = 14;
-const LABEL_USAGE_GAP = 18;
-const CLUSTER_VPAD = 8;
+const LABEL_LINE_HEIGHT = 14; // height of one text line
+const LABEL_USAGE_GAP = 18; // gap between last text line and the usage line
+const CLUSTER_VPAD = 8; // vertical padding inside a node box
 
 let currentTreeRoot = null;
-
-/**
- * Compresses a linear path into a single node
- * A node is compressed while it has exactly one child
- */
-function compress(node) {
-    const items = [node.item];
-    const uris = [node.uri];
-    const types = [node.type];
-
-    let current = node;
-
-    while (current.children && current.children.length === 1) {
-        current = current.children[0];
-
-        items.push(current.item);
-        uris.push(current.uri);
-        types.push(current.type);
-    }
-
-    const hasBranch = current.children && current.children.length > 1;
-
-    const children = hasBranch ? current.children.map(compress) : [];
-
-    return {
-        items,
-        uris,
-        types,
-        usage: current.usage,
-        support: current.support,
-        children
-    };
-}
-
 
 /**
  * Returns the label that should be displayed inside a cluster,
  * one entry per line, depending on the selected view mode
  */
 function getClusterLabelLines(data, viewMode) {
+    if (!data.details) return [data.items ? data.items.join(",") : ""];
     switch (viewMode) {
         case "type":
-            return data.types.filter(value => value ?? "?");
-
+            return data.details.map(d => d.type ?? "?");
         case "uri":
-            return data.uris.map(value => value ?? "?");
-
+            return data.details.map(d => d.uri ?? "?");
         case "item":
         default:
-            return [data.items.join(",")];
+            return [data.items ? data.items.join(",") : ""];
     }
 }
 
-
 /**
- * Computes the vertical layout of a cluster's text content:
+ * Computes the vertical layout of a cluster's text content
+ * Text center around 0
  */
 function verticalLayout(lineCount) {
 
@@ -83,7 +49,7 @@ function verticalLayout(lineCount) {
     const bottomRaw = usageYRaw + LABEL_LINE_HEIGHT / 2 + CLUSTER_VPAD;
 
     const rawHeight = bottomRaw - topRaw;
-    const height = Math.max(CLUSTER_HEIGHT, rawHeight);
+    const height = Math.max(CLUSTER_MIN_HEIGHT, rawHeight);
 
     const midpoint = (topRaw + bottomRaw) / 2;
 
@@ -94,16 +60,12 @@ function verticalLayout(lineCount) {
     };
 }
 
-
 /**
- * Computes the width of a cluster based on:
- * - the longest displayed line
- * - usage
- * - support
+ * Computes the width of a cluster
  */
 function clusterWidth(d, viewMode = "item") {
-    const lines = getClusterLabelLines(d.data, viewMode);
-    const usageText = `u:${d.data.usage} s:${d.data.support}`;
+    const lines = getClusterLabelLines(d, viewMode);
+    const usageText = `usage:${d.usage}`;
 
     const longestLine = Math.max(0, ...lines.map(line => line.length));
     const longest = Math.max(longestLine, usageText.length);
@@ -111,25 +73,23 @@ function clusterWidth(d, viewMode = "item") {
     return Math.max(CLUSTER_MIN_WIDTH, longest * CHAR_WIDTH + CLUSTER_PAD_X * 2);
 }
 
-
 /**
  * Computes the height of a cluster
  */
 function clusterHeight(d, viewMode = "item") {
-    const lines = getClusterLabelLines(d.data, viewMode);
+    const lines = getClusterLabelLines(d, viewMode);
     return verticalLayout(lines.length).height;
 }
 
-
 /**
  * Renders the item-label <text> as one or more vertically stacked
- * <tspan> lines and repositions the usage-label right below them.
+ * <tspan> lines and repositions the usage-label right below them
  */
 function renderClusterLabel(nodeGroupSelection, viewMode) {
 
     nodeGroupSelection.each(function (d) {
 
-        const lines = getClusterLabelLines(d.data, viewMode);
+        const lines = getClusterLabelLines(d, viewMode);
         const layout = verticalLayout(lines.length);
         const sel = d3.select(this); // <g.node>
 
@@ -145,60 +105,157 @@ function renderClusterLabel(nodeGroupSelection, viewMode) {
 
         sel.select("text.usage-label")
             .attr("y", layout.usageY)
-            .text(`u:${d.data.usage} s:${d.data.support}`);
+            .text(`usage:${d.usage}`);
     });
 }
 
+/**
+ * Assigns each node a depth equal to the length of the longest path
+ * reaching it from any root node
+ */
+function assignDepths(nodes, links) {
+    nodes.forEach(n => n.depth = 0);
+    const maxIterations = nodes.length + 1;
+    let iterations = 0;
+    let changed = true;
+    while (changed && iterations < maxIterations) {
+        changed = false;
+        links.forEach(link => {
+            if (link.sourceObj && link.targetObj) {
+                if (link.targetObj.depth < link.sourceObj.depth + 1) {
+                    link.targetObj.depth = link.sourceObj.depth + 1;
+                    changed = true;
+                }
+            }
+        });
+        iterations++;
+    }
+}
 
 /**
- * Recalculates the complete tree layout according to the
- * current cluster widths/heights
+ * Groups nodes into connected components
  */
-function updateTreeLayout(viewMode, root, g) {
+function computeComponents(nodes, links) {
 
-    root.each(d => {
+    const adjacency = new Map();
+    nodes.forEach(n => adjacency.set(n.id, []));
+
+    // create relation source->target and viceversa
+    links.forEach(l => {
+        if (!l.sourceObj || !l.targetObj) return;
+        adjacency.get(l.sourceObj.id).push(l.targetObj.id);
+        adjacency.get(l.targetObj.id).push(l.sourceObj.id);
+    });
+
+    const nodeById = new Map(nodes.map(n => [n.id, n]));
+    const visited = new Set();
+    const components = [];
+
+    nodes.forEach(start => {
+        if (visited.has(start.id)) return;
+
+        const compNodes = [];
+        const stack = [start.id];
+        visited.add(start.id);
+
+        while (stack.length) {
+            const id = stack.pop();
+            compNodes.push(nodeById.get(id));
+
+            adjacency.get(id).forEach(neighborId => {
+                if (!visited.has(neighborId)) {
+                    visited.add(neighborId);
+                    stack.push(neighborId);
+                }
+            });
+        }
+        components.push(compNodes);
+    });
+
+    return components;
+}
+
+/**
+ * Lays out a single connected component
+ * - columns by depth
+ * - rows within each column
+ * Centered around x = 0
+ */
+function layoutComponent(componentNodes, componentLinks, nodeSepY) {
+
+    const levels = d3.groups(componentNodes, d => d.depth); // [depth, [nodes with that depth]]
+    levels.sort((a, b) => a[0] - b[0]); // ascending depth
+    let currentY = 0;
+
+    levels.forEach(([depth, levelNodes]) => {
+        const maxWidth = d3.max(levelNodes, d => d.clusterWidth) || CLUSTER_MIN_WIDTH;
+
+        if (depth === 0) {
+            currentY = maxWidth / 2;
+        } else {
+            const prevNodes = componentNodes.filter(n => n.depth === depth - 1);
+            const prevMaxWidth = d3.max(prevNodes, n => n.clusterWidth) || CLUSTER_MIN_WIDTH;
+            currentY += prevMaxWidth / 2 + LEVEL_SEP_X + maxWidth / 2;
+        }
+
+        // for long links
+        const bypassLinks = componentLinks.filter(l => l.targetObj.depth - l.sourceObj.depth > 1);
+        const isBypassed = bypassLinks.some(l => l.sourceObj.depth < depth && l.targetObj.depth > depth);
+
+        // total height occupied by all nodes
+        const totalHeight = (levelNodes.length - 1) * nodeSepY;
+
+        levelNodes.forEach((node, i) => {
+            node.y = currentY;
+            let baseX = i * nodeSepY - totalHeight / 2;
+
+            // make space for the long links
+            if (isBypassed) {
+                baseX -= 80;
+            }
+            node.x = baseX;
+        });
+    });
+}
+
+/**
+ * Positions every node (grouped by connected graph) and draws all the links
+ */
+function updateGraphLayout(viewMode, root, g) {
+    const nodes = root.nodes || [];
+    const links = root.links || [];
+
+    nodes.forEach(d => {
         d.clusterWidth = clusterWidth(d, viewMode);
         d.clusterHeight = clusterHeight(d, viewMode);
     });
 
-    const maxClusterHeight = d3.max(root.descendants(), d => d.clusterHeight) || CLUSTER_HEIGHT;
+    const maxClusterHeight = d3.max(nodes, d => d.clusterHeight) || CLUSTER_MIN_HEIGHT;
     const nodeSepY = Math.max(NODE_SEP_Y_MIN, maxClusterHeight + NODE_SEP_GAP);
 
-    const treeLayout = d3.tree().nodeSize([nodeSepY, LEVEL_SEP_X]);
+    const components = computeComponents(nodes, links);
 
-    treeLayout(root);
+    let bottomEdge = null; // from last component
 
-    const levels = d3.groups(root.descendants(), d => d.depth);
-    const levelWidths = new Map();
+    components.forEach(componentNodes => {
 
-    levels.forEach(([depth, nodes]) => {
+        const componentIds = new Set(componentNodes.map(n => n.id));
+        const componentLinks = links.filter(l => l.sourceObj && l.targetObj && componentIds.has(l.sourceObj.id));
 
-        const maxWidth = d3.max(nodes, d => d.clusterWidth) || CLUSTER_MIN_WIDTH;
-        levelWidths.set(depth, maxWidth);
-    });
+        layoutComponent(componentNodes, componentLinks, nodeSepY);
 
-    const levelPositions = new Map();
-    let currentY = 0;
-    const maxDepth = d3.max(root.descendants(), d => d.depth) || 0;
+        // component position
+        const top = d3.min(componentNodes, n => n.x - n.clusterHeight / 2);
+        const bottom = d3.max(componentNodes, n => n.x + n.clusterHeight / 2);
 
-    for (let depth = 0; depth <= maxDepth; depth++) {
-
-        const levelWidth = levelWidths.get(depth) || CLUSTER_MIN_WIDTH;
-
-        if (depth === 0) {
-            currentY = levelWidth / 2;
-
+        if (bottomEdge === null) {
+            // center in 0
+            bottomEdge = bottom;
         } else {
-            const previousWidth = levelWidths.get(depth - 1) || CLUSTER_MIN_WIDTH;
-            currentY += previousWidth / 2 + LEVEL_SEP_X + levelWidth / 2;
+            const offset = (bottomEdge + COMPONENT_GAP) - top;
+            componentNodes.forEach(n => { n.x += offset; });
+            bottomEdge = bottom + offset;
         }
-
-        levelPositions.set(depth, currentY);
-    }
-
-
-    root.each(d => {
-        d.y = levelPositions.get(d.depth);
     });
 
     g.selectAll("g.node").attr("transform", d => `translate(${d.y},${d.x})`);
@@ -209,81 +266,77 @@ function updateTreeLayout(viewMode, root, g) {
         .attr("width", d => clusterWidth(d, viewMode))
         .attr("height", d => clusterHeight(d, viewMode));
 
+    // like Bezier curve
     const linkGenerator = d3.linkHorizontal().x(d => d.y).y(d => d.x);
 
+    // link position
     g.selectAll("path.link")
         .attr("d", d => {
+            const srcWidth = clusterWidth(d.sourceObj, viewMode) / 2;
+            const tgtWidth = clusterWidth(d.targetObj, viewMode) / 2;
 
-            const sourceWidth = clusterWidth(d.source, viewMode) / 2;
+            const srcPt = { x: d.sourceObj.y + srcWidth, y: d.sourceObj.x };
+            const tgtPt = { x: d.targetObj.y - tgtWidth, y: d.targetObj.x };
 
-            const targetWidth = clusterWidth(d.target, viewMode) / 2;
+            if (d.targetObj.depth - d.sourceObj.depth > 1) {
+                const midX = (srcPt.x + tgtPt.x) / 2;
+                const midY = Math.max(srcPt.y, tgtPt.y) + 65;
+                return `M ${srcPt.x} ${srcPt.y} Q ${midX} ${midY} ${tgtPt.x} ${tgtPt.y}`;
+            }
 
             return linkGenerator({
-                source: {
-                    x: d.source.x,
-                    y: d.source.y + sourceWidth
-                },
-
-                target: {
-                    x: d.target.x,
-                    y: d.target.y - targetWidth
-                }
+                source: { x: srcPt.y, y: srcPt.x },
+                target: { x: tgtPt.y, y: tgtPt.x }
             });
         });
 }
-
 
 /**
  * Updates the labels and recalculates the complete layout
  */
 function updateClusterLabels(viewMode, g, root) {
-
     renderClusterLabel(g.selectAll("g.node"), viewMode);
-    updateTreeLayout(viewMode, root, g);
+    updateGraphLayout(viewMode, root, g);
 }
 
-
 /**
- * Renders the tree given the root node data
- * The root node is a virtual node that has all the independent groups as children
+ * Buils the whole graph from scratch. Creates the DOM elements and draws them
  */
 function renderTree(data, svg, g, zoomBehavior, viewMode) {
-
     document.getElementById("empty-state").style.display = "none";
     svg.style("display", "block");
     g.selectAll("*").remove();
 
-    const realGroups = (data.children || []).map(compress); // skip -1 root node ROOT
-    const virtualRoot = {items: [], uris: [], types: [], usage: 0, support: 0,
-        children: realGroups};  // to help d3 calculate positions
+    currentTreeRoot = data;
 
+    const nodes = data.nodes || [];
+    const links = data.links || [];
 
-    // create D3 hierarchy
-    const root = d3.hierarchy(virtualRoot, d => d.children);
-    currentTreeRoot = root;
-    const realNodes = root.descendants().filter(d => d.depth > 0);
+    const nodeMap = new Map(nodes.map(n => [n.id, n]));
+    links.forEach(l => {
+        l.sourceObj = nodeMap.get(l.source);
+        l.targetObj = nodeMap.get(l.target);
+    });
 
-    // maximum usage for the colour scale
-    const maxUsage = d3.max(realNodes, d => d.data.usage) || 1;
+    assignDepths(nodes, links);
+
+    const maxUsage = d3.max(nodes, d => d.usage) || 1;
 
     const colorScale = d3.scaleSequential()
         .domain([0, maxUsage])
-        .interpolator(d3.interpolateRgbBasis([getVar("--accent-cold"), getVar("--accent-hot")]));
-
-    // only render links between real nodes
-    const realLinks = root.links().filter(l => l.source.depth > 0); // {source, target}
+        .interpolator(d3.interpolateRgbBasis([getVar("--accent-hot"), getVar("--accent-cold")]));
 
     g.append("g")
         .attr("class", "links")
         .selectAll("path")
-        .data(realLinks)
+        .data(links)
         .join("path")
         .attr("class", "link");
 
     const nodeGroup = g.append("g")
         .attr("class", "nodes")
         .selectAll("g")
-        .data(realNodes)
+        .data(nodes)
         .join("g")
         .attr("class", "node")
         .on("mouseenter", showTooltip)
@@ -292,17 +345,14 @@ function renderTree(data, svg, g, zoomBehavior, viewMode) {
 
     nodeGroup.append("rect")
         .attr("class", "cluster")
-        .attr("rx", CLUSTER_HEIGHT / 2)
-        .attr("ry", CLUSTER_HEIGHT / 2)
-        .attr("fill", d => colorScale(d.data.usage))
+        .attr("rx", CLUSTER_MIN_HEIGHT / 2)
+        .attr("ry", CLUSTER_MIN_HEIGHT / 2)
+        .attr("fill", d => colorScale(d.usage))
         .attr("fill-opacity", 0.16)
-        .attr("stroke", d => colorScale(d.data.usage));
+        .attr("stroke", d => colorScale(d.usage));
 
-    nodeGroup.append("text")
-        .attr("class", "item-label");
-
-    nodeGroup.append("text")
-        .attr("class", "usage-label");
+    nodeGroup.append("text").attr("class", "item-label");
+    nodeGroup.append("text").attr("class", "usage-label");
 
     renderClusterLabel(nodeGroup, viewMode);
 
@@ -310,11 +360,10 @@ function renderTree(data, svg, g, zoomBehavior, viewMode) {
     const initialTransform = d3.zoomIdentity.translate(60, window.innerHeight / 2 - 56).scale(1);
     svg.call(zoomBehavior.transform, initialTransform);
 
-    document.getElementById("status").textContent = `${realNodes.length} nodes · max usage: ${maxUsage}`;
+    document.getElementById("status").textContent = `${nodes.length} nodes · max usage: ${maxUsage}`;
 
-    updateTreeLayout(viewMode, currentTreeRoot, g);
+    updateGraphLayout(viewMode, data, g);
 }
-
 
 /**
  * CSS -> JS

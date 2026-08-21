@@ -105,8 +105,8 @@ body {
   border-radius: 4px;
   background: linear-gradient(
     90deg,
-    var(--accent-hot),
-    var(--accent-cold)
+    var(--accent-cold),
+    var(--accent-hot)
   );
 }
 
@@ -155,7 +155,7 @@ svg:active {
 
 .node text.usage-label {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   fill: var(--text-dim);
   pointer-events: none;
   text-anchor: middle;
@@ -195,7 +195,7 @@ svg:active {
 }
 
 #tooltip .head {
-  color: var(--accent-hot);
+  color: var(--accent-cold);
   font-weight: 600;
   margin-bottom: 4px;
 }
