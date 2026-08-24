@@ -22,7 +22,7 @@ function getClusterLabelLines(data, viewMode) {
     if (!data.details) return [data.items ? data.items.join(",") : ""];
     switch (viewMode) {
         case "itemO":
-            return data.details.map(d => d.type ?? "?");
+            return  [data.details.map(d => d.originalItem ?? "?").join(",")]
         case "itemV":
         default:
             return [data.items ? data.items.join(",") : ""];
@@ -92,13 +92,11 @@ function renderClusterLabel(nodeGroupSelection, viewMode) {
         const sel = d3.select(this); // <g.node>
 
         const itemLabel = sel.select("text.item-label");
-        itemLabel.selectAll("tspan").remove();
 
         lines.forEach((line, i) => {
-            itemLabel.append("tspan")
-                .attr("x", 0)
-                .attr("y", layout.lineYs[i])
-                .text(line);
+            itemLabel.attr("x", 0)
+                    .attr("y", layout.lineYs[i])
+                    .text(line);
         });
 
         sel.select("text.usage-label")
@@ -278,7 +276,7 @@ function updateGraphLayout(viewMode, root, g) {
 
             if (d.targetObj.depth - d.sourceObj.depth > 1) {
                 const midX = (srcPt.x + tgtPt.x) / 2;
-                const midY = Math.max(srcPt.y, tgtPt.y) + 65;
+                const midY = Math.max(srcPt.y, tgtPt.y) + 85;
                 return `M ${srcPt.x} ${srcPt.y} Q ${midX} ${midY} ${tgtPt.x} ${tgtPt.y}`;
             }
 

@@ -9,9 +9,10 @@ const tooltip = d3.select("#tooltip");
 function showTooltip(event, d) {
     const itemsText = d.items.join(", ");
     const fullPatternText = d.details ? d.details.map(det => {
+        const originalItem = det.originalItem ?? "?";
         const uri = det.uri ?? "?";
         const type = det.type ?? "?";
-        return `${det.item} &nbsp;&nbsp; ${uri} &nbsp;&nbsp; ${type}`;  
+        return `${det.item} - ${originalItem} &nbsp;&nbsp; ${uri} &nbsp;&nbsp; ${type}`;  
     }).join("<br>") : "";
 
     tooltip
@@ -25,10 +26,6 @@ function showTooltip(event, d) {
             <div class="row">
                 <span>usage</span>
                 <span>${d.usage}</span>
-            </div>
-            <div class="row">
-                <span>support</span>
-                <span>${d.support}</span>
             </div>
             <div class="row">
                 <span>items in chain</span>

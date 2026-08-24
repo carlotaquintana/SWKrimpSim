@@ -205,13 +205,13 @@ rm -fr "$EXP_DIR"compress_ng/*
 # Decode Vreeken code table
 ###############################################################################
 
-echo
-echo "Decoding Vreeken code table..."
+#echo
+#echo "Decoding Vreeken code table..."
 
-java -jar ./DecodeVreeken.jar "$ORIGINAL_NAME"
+#java -jar ./DecodeVreeken.jar "$ORIGINAL_NAME"
 
-if [[ $? -ne 0 ]]; then
-    echo "Code table decoding failed."
-    exit 1
-fi
+#if [[ $? -ne 0 ]]; then
+#    echo "Code table decoding failed."
+#    exit 1
+#fi
 
