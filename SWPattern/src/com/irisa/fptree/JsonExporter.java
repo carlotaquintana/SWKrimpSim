@@ -70,12 +70,12 @@ public class JsonExporter {
             json.append("      \"details\": [\n");
             for (int j = 0; j < items.size(); j++) {
                 int vreekenItem = items.get(j);
-                Integer originalId = conversion.get(vreekenItem);
+                Integer originalItem = conversion.get(vreekenItem);
                 ItemTranslation tr = translations.get(vreekenItem);
 
                 json.append("        {\n");
                 json.append("          \"item\": ").append(vreekenItem).append(",\n");
-                json.append("          \"originalId\": ").append(originalId != null ? originalId : "null").append(",\n");
+                json.append("          \"originalItem\": ").append(originalItem != null ? originalItem : "null").append(",\n");
                 json.append("          \"uri\": ").append(tr != null ? "\"" + escapeJson(tr.getURI()) + "\"" : "null").append(",\n");
                 json.append("          \"type\": ").append(tr != null ? "\"" + escapeJson(tr.getType()) + "\"" : "null").append("\n");
                 json.append("        }").append(j < items.size() - 1 ? ",\n" : "\n");
