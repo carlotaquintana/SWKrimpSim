@@ -7,6 +7,10 @@ public class FPTreeBuilder {
 
     private long maxSupport = 0;
 
+    public long getMaxSupport(){
+        return maxSupport;
+    }
+
     public FPNode build(List<CtPattern> patterns, int selectedItem) {
 
         List<CtPattern> filtered = patterns.stream()
