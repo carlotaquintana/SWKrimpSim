@@ -125,15 +125,24 @@ public class FPTreeBuilder {
             }
         }
 
-        // Virtual node
+        // Virtual node. Start/end
         FPNode root = new FPNode(-1);
         for (CtPattern p : activePatterns) {
             List<Integer> items = p.getItems();
-            if (!items.isEmpty()) {
-                FPNode startNode = itemToNode.get(items.get(0));
-                if (startNode != null && !root.getChildren().contains(startNode)) {
+            if (items.isEmpty()) continue;
+
+            FPNode startNode = itemToNode.get(items.get(0));
+            if (startNode != null){
+                startNode.setStart(true);
+             
+                if (!root.getChildren().contains(startNode)) {
                     root.addChild(startNode);
                 }
+            }
+
+            FPNode endNode = itemToNode.get(items.get(items.size() - 1));
+            if (endNode != null) {
+                endNode.setEnd(true);
             }
         }
 

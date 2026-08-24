@@ -82,7 +82,9 @@ public class JsonExporter {
             }
             json.append("      ],\n");
             json.append("      \"rawUsage\": ").append(node.getUsage()).append(",\n");
-            json.append("      \"usage\": ").append(String.format(Locale.US, "%.6f", node.getNormalizedUsage())).append("\n");
+            json.append("      \"usage\": ").append(String.format(Locale.US, "%.6f", node.getNormalizedUsage())).append(",\n");
+            json.append("      \"isStart\": ").append(node.isStart()).append(",\n");
+            json.append("      \"isEnd\": ").append(node.isEnd()).append("\n");
             json.append("    }").append(i < nodeList.size() - 1 ? ",\n" : "\n");
         }
         json.append("  ],\n");

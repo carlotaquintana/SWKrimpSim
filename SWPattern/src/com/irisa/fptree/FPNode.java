@@ -1,6 +1,5 @@
 package com.irisa.fptree;
 
-import java.util.Collection;
 import java.util.*;
 
 public class FPNode {
@@ -9,6 +8,7 @@ public class FPNode {
     private long support;
     private double normalizedUsage;
     private final List<FPNode> children = new ArrayList<>();
+    private boolean start, end;
 
 
     public FPNode(List<Integer> items) {
@@ -66,6 +66,22 @@ public class FPNode {
 
     public boolean isRoot() {
         return items.isEmpty();
+    }
+
+    public boolean isStart() {
+        return start;
+    }
+ 
+    public void setStart(boolean start) {
+        this.start = start;
+    }
+ 
+    public boolean isEnd() {
+        return end;
+    }
+ 
+    public void setEnd(boolean end) {
+        this.end = end;
     }
 
     public void addCounts(long usage, long support) {
