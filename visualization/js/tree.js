@@ -12,6 +12,9 @@ const LABEL_LINE_HEIGHT = 14; // height of one text line
 const LABEL_USAGE_GAP = 18; // gap between last text line and the usage line
 const CLUSTER_VPAD = 8; // vertical padding inside a node box
 
+const RING_GAP = 6; // offset of the start ring node
+const RING_GAP_END = 12; // offset of the end ring node
+
 let currentTreeRoot = null;
 
 /**
@@ -262,6 +265,24 @@ function updateGraphLayout(viewMode, root, g) {
         .attr("width", d => clusterWidth(d, viewMode))
         .attr("height", d => clusterHeight(d, viewMode));
 
+    // Extra ring for start nodes
+    g.selectAll("rect.cluster-ring-start")
+        .attr("x", d => -clusterWidth(d, viewMode) / 2 - RING_GAP)
+        .attr("y", d => -clusterHeight(d, viewMode) / 2 - RING_GAP)
+        .attr("width", d => clusterWidth(d, viewMode) + RING_GAP * 2)
+        .attr("height", d => clusterHeight(d, viewMode) + RING_GAP * 2)
+        .attr("rx", d => clusterHeight(d, viewMode) / 2 + RING_GAP)
+        .attr("ry", d => clusterHeight(d, viewMode) / 2 + RING_GAP);
+    
+    // Extra ring for end nodes
+    g.selectAll("rect.cluster-ring-end")
+        .attr("x", d => -clusterWidth(d, viewMode) / 2 - (d.isStart ? RING_GAP_END : RING_GAP))
+        .attr("y", d => -clusterHeight(d, viewMode) / 2 - (d.isStart ? RING_GAP_END : RING_GAP))
+        .attr("width", d => clusterWidth(d, viewMode) + (d.isStart ? RING_GAP_END : RING_GAP) * 2)
+        .attr("height", d => clusterHeight(d, viewMode) + (d.isStart ? RING_GAP_END : RING_GAP) * 2)
+        .attr("rx", d => clusterHeight(d, viewMode) / 2 + (d.isStart ? RING_GAP_END : RING_GAP))
+        .attr("ry", d => clusterHeight(d, viewMode) / 2 + (d.isStart ? RING_GAP_END : RING_GAP));
+
     // like Bezier curve
     const linkGenerator = d3.linkHorizontal().x(d => d.y).y(d => d.x);
 
@@ -346,6 +367,19 @@ function renderTree(data, svg, g, zoomBehavior, viewMode) {
         .attr("fill", d => colorScale(d.usage))
         .attr("fill-opacity", 0.16)
         .attr("stroke", d => colorScale(d.usage));
+
+    nodeGroup.filter(d => d.isStart)
+        .append("rect")
+        .attr("class", "cluster-ring cluster-ring-start")
+        .attr("fill", "none")
+        .attr("stroke", d => colorScale(d.usage));
+
+    nodeGroup.filter(d => d.isEnd)
+        .append("rect")
+        .attr("class", "cluster-ring cluster-ring-end")
+        .attr("fill", "none")
+        .attr("stroke", d => colorScale(d.usage))
+        .attr("stroke-dasharray", "4 3");
 
     nodeGroup.append("text").attr("class", "item-label");
     nodeGroup.append("text").attr("class", "usage-label");
