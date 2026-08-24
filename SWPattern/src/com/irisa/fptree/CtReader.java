@@ -21,9 +21,10 @@ public class CtReader {
         }
 
         try {
-            for (String s : lines) {
+            for (int i = 2; i < lines.size(); i++) {
+ 
+                String line = lines.get(i).trim();
 
-                String line = s.trim();
                 if (line.isEmpty()) continue;
 
                 String[] tokens = line.split("\\s+");

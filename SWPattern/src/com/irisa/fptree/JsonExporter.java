@@ -7,7 +7,8 @@ import java.util.*;
 
 public class JsonExporter {
 
-    public static void export(FPNode root, Map<Integer, ItemTranslation> translations, Path output) throws IOException {
+    public static void export(FPNode root, Map<Integer, ItemTranslation> translations, 
+                                Map<Integer, Integer> conversion, Path output) throws IOException {
 
         List<FPNode> nodeList = new ArrayList<>();
         Map<FPNode, String> nodeIds = new IdentityHashMap<>();
@@ -68,10 +69,13 @@ public class JsonExporter {
             // Item translation
             json.append("      \"details\": [\n");
             for (int j = 0; j < items.size(); j++) {
-                int item = items.get(j);
-                ItemTranslation tr = translations.get(item);
+                int vreekenItem = items.get(j);
+                Integer originalId = conversion.get(vreekenItem);
+                ItemTranslation tr = translations.get(vreekenItem);
+
                 json.append("        {\n");
-                json.append("          \"item\": ").append(item).append(",\n");
+                json.append("          \"item\": ").append(vreekenItem).append(",\n");
+                json.append("          \"originalId\": ").append(originalId != null ? originalId : "null").append(",\n");
                 json.append("          \"uri\": ").append(tr != null ? "\"" + escapeJson(tr.getURI()) + "\"" : "null").append(",\n");
                 json.append("          \"type\": ").append(tr != null ? "\"" + escapeJson(tr.getType()) + "\"" : "null").append("\n");
                 json.append("        }").append(j < items.size() - 1 ? ",\n" : "\n");
