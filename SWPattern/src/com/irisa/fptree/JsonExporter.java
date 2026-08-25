@@ -82,9 +82,40 @@ public class JsonExporter {
             }
             json.append("      ],\n");
             json.append("      \"rawUsage\": ").append(node.getUsage()).append(",\n");
-            json.append("      \"usage\": ").append(String.format(Locale.US, "%.6f", node.getNormalizedUsage())).append("\n");
+            json.append("      \"usage\": ").append(String.format(Locale.US, "%.6f", node.getNormalizedUsage())).append(",\n");
             json.append("      \"isStart\": ").append(node.isStart()).append(",\n");
-            json.append("      \"isEnd\": ").append(node.isEnd()).append("\n");
+            json.append("      \"isEnd\": ").append(node.isEnd()).append(",\n");
+
+            // .ct patterns
+            List<CtPattern> sourcePatterns = node.getSourcePatterns();
+            json.append("      \"patterns\": [");
+            for (int j = 0; j < sourcePatterns.size(); j++) {
+                CtPattern pattern = sourcePatterns.get(j);
+                json.append("\n        {\n");
+                json.append("          \"items\": [");
+                List<Integer> patternItems = pattern.getItems();
+                for (int k = 0; k < patternItems.size(); k++) {
+                    json.append(patternItems.get(k));
+                    if (k < patternItems.size() - 1) json.append(", ");
+                }
+                json.append("],\n");
+                json.append("          \"nodeItems\": [");
+                for (int k = 0; k < items.size(); k++) {
+                    json.append(items.get(k));
+                    if (k < items.size() - 1) json.append(", ");
+                }
+                json.append("],\n");
+                json.append("          \"rawUsage\": ").append(pattern.getUsage()).append(",\n");
+                json.append("          \"usage\": ")
+                    .append(String.format(Locale.US, "%.6f", node.getPatternUsage(pattern)))
+                    .append("\n");
+                json.append("        }");
+                json.append(j < sourcePatterns.size() - 1 ? "," : "");
+            }
+            if (!sourcePatterns.isEmpty()) {
+                json.append("\n      ");
+            }
+            json.append("]\n");
             json.append("    }").append(i < nodeList.size() - 1 ? ",\n" : "\n");
         }
         json.append("  ],\n");

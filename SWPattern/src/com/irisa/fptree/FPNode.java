@@ -10,6 +10,10 @@ public class FPNode {
     private final List<FPNode> children = new ArrayList<>();
     private boolean start, end;
 
+    private final List<CtPattern> sourcePatterns = new ArrayList<>();
+    private final Set<CtPattern> sourcePatternsSeen = new HashSet<>();
+    private final Map<CtPattern, Double> patternUsage = new LinkedHashMap<>();
+
 
     public FPNode(List<Integer> items) {
         this.items = (items != null) ? new ArrayList<>(items) : Collections.emptyList();
@@ -88,4 +92,20 @@ public class FPNode {
         this.usage += usage;
         this.support += support;
     }
+
+    public void addSourcePattern(CtPattern pattern, double lineUsage) {
+        if (sourcePatternsSeen.add(pattern)) {
+            sourcePatterns.add(pattern);
+            patternUsage.put(pattern, lineUsage);
+        }
+    }
+ 
+    public List<CtPattern> getSourcePatterns() {
+        return sourcePatterns;
+    }
+ 
+    public double getPatternUsage(CtPattern pattern) {
+        return patternUsage.getOrDefault(pattern, 0.0);
+    }
+
 }

@@ -117,14 +117,21 @@ public class FPTreeBuilder {
             }
         }
 
-        // Link compresses patterns
+        // Link compresses patterns + pattern usage
         for (CtPattern p : activePatterns) {
             List<Integer> items = p.getItems();
-            for (int i = 0; i < items.size() - 1; i++) {
-                FPNode srcNode = itemToNode.get(items.get(i));
-                FPNode tgtNode = itemToNode.get(items.get(i + 1));
-                if (srcNode != null && tgtNode != null && srcNode != tgtNode) {
-                    srcNode.addChild(tgtNode);
+            double lineUsage = (maxSupport > 0) ? (double) p.getUsage() / maxSupport : 0.0;
+            for (int i = 0; i < items.size(); i++) {
+                FPNode node = itemToNode.get(items.get(i));
+                if (node != null){
+                    node.addSourcePattern(p, lineUsage);
+                }
+                if (i < items.size() - 1) {
+                    FPNode srcNode = node;
+                    FPNode tgtNode = itemToNode.get(items.get(i + 1));
+                    if (srcNode != null && tgtNode != null && srcNode != tgtNode) {
+                        srcNode.addChild(tgtNode);
+                    }
                 }
             }
         }
