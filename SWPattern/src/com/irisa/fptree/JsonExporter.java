@@ -91,20 +91,38 @@ public class JsonExporter {
             json.append("      \"patterns\": [");
             for (int j = 0; j < sourcePatterns.size(); j++) {
                 CtPattern pattern = sourcePatterns.get(j);
+                List<Integer> patternItems = pattern.getItems();
                 json.append("\n        {\n");
                 json.append("          \"items\": [");
-                List<Integer> patternItems = pattern.getItems();
-                for (int k = 0; k < patternItems.size(); k++) {
+                for (int k = 0; k < patternItems.size(); k++){
                     json.append(patternItems.get(k));
                     if (k < patternItems.size() - 1) json.append(", ");
                 }
                 json.append("],\n");
+
+                json.append("          \"originalItems\": [");
+                for (int k = 0; k < patternItems.size(); k++){
+                    Integer originalPatternItem = conversion.get(patternItems.get(k));
+                    json.append(originalPatternItem != null ? originalPatternItem : "null");
+                    if (k < patternItems.size() - 1) json.append(", ");
+                }
+                json.append("],\n");
+
                 json.append("          \"nodeItems\": [");
-                for (int k = 0; k < items.size(); k++) {
+                for (int k = 0; k < items.size(); k++){
                     json.append(items.get(k));
                     if (k < items.size() - 1) json.append(", ");
                 }
                 json.append("],\n");
+
+                json.append("          \"originalNodeItems\": [");
+                for (int k = 0; k < items.size(); k++){
+                    Integer originalNodeItem = conversion.get(items.get(k));
+                    json.append(originalNodeItem != null ? originalNodeItem : "null");
+                    if (k < items.size() - 1) json.append(", ");
+                }
+                json.append("],\n");
+
                 json.append("          \"rawUsage\": ").append(pattern.getUsage()).append(",\n");
                 json.append("          \"usage\": ")
                     .append(String.format(Locale.US, "%.6f", node.getPatternUsage(pattern)))

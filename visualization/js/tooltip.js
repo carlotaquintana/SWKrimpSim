@@ -7,7 +7,11 @@ const tooltip = d3.select("#tooltip");
  * @param {Object} d - D3 hierarchy node
  */
 function showTooltip(event, d) {
-    const itemsText = d.items.join(", ");
+    const headItems = viewMode === "itemO"
+        ? (d.details ? d.details.map(det => det.originalItem ?? "?") : d.items)
+        : d.items;
+
+    const itemsText = headItems.join(", ");
     const fullPatternText = d.details ? d.details.map(det => {
         const originalItem = det.originalItem ?? "?";
         const uri = det.uri ?? "?";
@@ -50,12 +54,18 @@ function renderPatterns(d) {
         return `<div class="pattern-line pattern-empty">-</div>`;
     }
 
-    const nodeItemsSet = new Set(d.nodeItems ?? d.items ?? []);
+    const useOriginal = viewMode === "itemO";
+    const nodeItemsSet = new Set(useOriginal
+            ? (d.details ? d.details.map(det => det.originalItem ?? "?") : (d.nodeItems ?? d.items ?? []))
+            : (d.nodeItems ?? d.items ?? [])
+    );
+
  
     return d.patterns.map(pattern => {
         const color = colorScale ? colorScale(pattern.usage) : "#ffffff"
+        const patternItems = useOriginal ? (pattern.originalItems ?? pattern.items) : pattern.items;
  
-        const itemsHtml = pattern.items.map(item => {
+        const itemsHtml = patternItems.map(item => {
             if (nodeItemsSet.has(item)) {
                 return `<span class="pattern-item pattern-item-node">${item}</span>`;
             }
