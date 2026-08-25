@@ -19,7 +19,7 @@ function showTooltip(event, d) {
         .html(`
             <div class="head">${itemsText}</div>
             <div class="row">
-                <span>Patterns</span>
+                <span>Item value</span>
                 <span>${fullPatternText}</span>
             </div>
             <br>
@@ -31,11 +31,45 @@ function showTooltip(event, d) {
                 <span>items in chain</span>
                 <span>${d.items ? d.items.length : 0}</span>
             </div>
+            <br>
+            <div class="patterns-block">
+                <div class="row-title">Patterns</div>
+                ${renderPatterns(d)}
+            </div>
         `)
     .style("display", "block");
 
     moveTooltip(event);
 }
+
+/**
+ * Builds the HTML for the patterns list
+ */
+function renderPatterns(d) {
+    if (!d.patterns || d.patterns.length === 0) {
+        return `<div class="pattern-line pattern-empty">-</div>`;
+    }
+
+    const nodeItemsSet = new Set(d.nodeItems ?? d.items ?? []);
+ 
+    return d.patterns.map(pattern => {
+        const color = colorScale ? colorScale(pattern.usage) : "#ffffff"
+ 
+        const itemsHtml = pattern.items.map(item => {
+            if (nodeItemsSet.has(item)) {
+                return `<span class="pattern-item pattern-item-node">${item}</span>`;
+            }
+            return `<span class="pattern-item" style="color:${color}">${item}</span>`;
+        }).join(" ");
+ 
+        return `
+            <div class="pattern-line">
+                <span class="pattern-items">${itemsHtml}</span>
+            </div>
+        `;
+    }).join("");
+}
+
 
 /**
  * Moves the tooltip next to the mouse cursor.

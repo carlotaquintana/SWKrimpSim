@@ -16,6 +16,7 @@ const RING_GAP = 6; // offset of the start ring node
 const RING_GAP_END = 12; // offset of the end ring node
 
 let currentTreeRoot = null;
+let colorScale = null;
 
 /**
  * Returns the label that should be displayed inside a cluster,
@@ -339,7 +340,7 @@ function renderTree(data, svg, g, zoomBehavior, viewMode) {
 
     const maxUsage = d3.max(nodes, d => d.usage) || 1;
 
-    const colorScale = d3.scaleSequential()
+    colorScale = d3.scaleSequential()
         .domain([0, maxUsage])
         .interpolator(d3.interpolateRgbBasis([getVar("--accent-hot"), getVar("--accent-cold")]));
 
