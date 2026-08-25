@@ -166,11 +166,8 @@ svg:active {
 #tooltip {
   position: fixed;
   min-width: 260px;
-
   max-width: calc(100vw - 32px); 
   max-height: 420px;
-
-
   pointer-events: none;
   background: var(--panel);
   border: 1px solid var(--border);

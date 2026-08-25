@@ -13,8 +13,9 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        if (args.length != 2) {
-            System.err.println("Usage: java -jar FPTreeBuilder.jar <dataset> <selectedItem>");
+        if (args.length > 2) {
+            System.err.println("Usage: selected item -> java -jar FPTreeBuilder.jar <dataset> <selectedItem>");
+            System.err.println("Usage: all items -> java -jar FPTreeBuilder.jar <dataset>");
             System.exit(1);
         }
 
@@ -26,9 +27,6 @@ public class Main {
             System.err.println(resultsDir);
             System.exit(1);
         }
-
-        
-        int selectedItem;
 
         Path ct = resultsDir.resolve("ct-latest.ct");
         Path analysis = resultsDir.resolve(dataset + ".db.analysis.txt");
@@ -51,13 +49,19 @@ public class Main {
             System.exit(1);
             return;
         }
- 
-        try {
-            selectedItem = Integer.parseInt(args[1]);
-        } catch (NumberFormatException e) {
-            System.err.println("Error: the selected item must be an integer: \"" + args[1] + "\"");
-            System.exit(1);
-            return;
+
+        final Integer selectedItem;
+        if (args.length == 1) {
+            selectedItem = null;
+
+        } else {
+            try {
+                selectedItem = Integer.parseInt(args[1]);
+            } catch (NumberFormatException e) {
+                System.err.println("Error: the selected item must be an integer: \"" + args[1] + "\"");
+                System.exit(1);
+                return;
+            }
         }
  
         try {
@@ -68,14 +72,18 @@ public class Main {
             System.out.println("Decoded code table written to:");
             System.out.println(ct_decoded); 
 
-            Path output = resultsDir.resolve("fptree-" + selectedItem + ".json");
-
             List<CtPattern> patterns = CtReader.readPatternsFromFile(ct);
             Map<Integer, ItemTranslation> translations = IdxReader.readTranslationsFromFile(idx);
 
-            if (patterns.stream().noneMatch(p -> p.contains(selectedItem))) {
-                System.err.println(
-                    "Warning: the selected item " + selectedItem + " is not present in any pattern.");
+            Path output;
+            if (selectedItem != null) {
+                output = resultsDir.resolve("fptree-" + selectedItem + ".json");
+                if (patterns.stream().noneMatch(p -> p.contains(selectedItem))) {
+                    System.err.println(
+                        "Warning: the selected item " + selectedItem + " is not present in any pattern.");
+                }
+            } else {
+                output = resultsDir.resolve("fptree-all.json");
             }
  
             FPTreeBuilder builder = new FPTreeBuilder();

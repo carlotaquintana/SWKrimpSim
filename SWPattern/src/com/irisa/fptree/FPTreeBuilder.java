@@ -11,22 +11,32 @@ public class FPTreeBuilder {
         return maxSupport;
     }
 
-    public FPNode build(List<CtPattern> patterns, int selectedItem) {
+    public FPNode build(List<CtPattern> patterns, Integer selectedItem) {
 
-        List<CtPattern> filtered = patterns.stream()
-                .filter(p -> p.contains(selectedItem))
-                .collect(Collectors.toList());
+        if (selectedItem != null) {
+            patterns = patterns.stream()
+                    .filter(p -> p.contains(selectedItem))
+                    .collect(Collectors.toList());
+        } 
 
-        for (CtPattern pattern : filtered) {
+        if (selectedItem != null) {
+            for (CtPattern pattern : patterns) {
 
-            if (pattern.getItems().size() == 1){
-                maxSupport = Math.max(maxSupport, pattern.getSupport());
-                if (pattern.getUsage() <= 0) continue;
+                if (pattern.getItems().size() == 1){
+                    maxSupport = Math.max(maxSupport, pattern.getSupport());
+                    if (pattern.getUsage() <= 0) continue;
+                }
             }
+        } else {
+            long totalUsage = 0;
+            for (CtPattern pattern : patterns){
+                totalUsage += pattern.getUsage();
+            }
+            maxSupport = totalUsage;
         }
 
         // Only patterns with usage > 0
-        List<CtPattern> activePatterns = filtered.stream()
+        List<CtPattern> activePatterns = patterns.stream()
                 .filter(p -> p.getUsage() > 0)
                 .collect(Collectors.toList());
 
