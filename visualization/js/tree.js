@@ -12,8 +12,10 @@ const LABEL_LINE_HEIGHT = 14; // height of one text line
 const LABEL_USAGE_GAP = 18; // gap between last text line and the usage line
 const CLUSTER_VPAD = 8; // vertical padding inside a node box
 
-const RING_GAP = 6; // offset of the start ring node
-const RING_GAP_END = 12; // offset of the end ring node
+const RING_GAP = 8; // offset of the start ring node
+
+const START_ARROW_LEN = 26; // length of the incoming arrow for start nodes
+const START_ARROW_GAP = 3; // small gap between the arrowhead and the box edge
 
 let currentTreeRoot = null;
 let colorScale = null;
@@ -266,23 +268,21 @@ function updateGraphLayout(viewMode, root, g) {
         .attr("width", d => clusterWidth(d, viewMode))
         .attr("height", d => clusterHeight(d, viewMode));
 
-    // Extra ring for start nodes
-    g.selectAll("rect.cluster-ring-start")
+    // Incoming arrow for start nodes
+    g.selectAll("line.start-arrow")
+        .attr("x1", d => -clusterWidth(d, viewMode) / 2 - START_ARROW_LEN)
+        .attr("y1", 0)
+        .attr("x2", d => -clusterWidth(d, viewMode) / 2 - START_ARROW_GAP)
+        .attr("y2", 0);
+    
+    // Extra ring for end nodes
+    g.selectAll("rect.cluster-ring-end")
         .attr("x", d => -clusterWidth(d, viewMode) / 2 - RING_GAP)
         .attr("y", d => -clusterHeight(d, viewMode) / 2 - RING_GAP)
         .attr("width", d => clusterWidth(d, viewMode) + RING_GAP * 2)
         .attr("height", d => clusterHeight(d, viewMode) + RING_GAP * 2)
         .attr("rx", d => clusterHeight(d, viewMode) / 2 + RING_GAP)
         .attr("ry", d => clusterHeight(d, viewMode) / 2 + RING_GAP);
-    
-    // Extra ring for end nodes
-    g.selectAll("rect.cluster-ring-end")
-        .attr("x", d => -clusterWidth(d, viewMode) / 2 - (d.isStart ? RING_GAP_END : RING_GAP))
-        .attr("y", d => -clusterHeight(d, viewMode) / 2 - (d.isStart ? RING_GAP_END : RING_GAP))
-        .attr("width", d => clusterWidth(d, viewMode) + (d.isStart ? RING_GAP_END : RING_GAP) * 2)
-        .attr("height", d => clusterHeight(d, viewMode) + (d.isStart ? RING_GAP_END : RING_GAP) * 2)
-        .attr("rx", d => clusterHeight(d, viewMode) / 2 + (d.isStart ? RING_GAP_END : RING_GAP))
-        .attr("ry", d => clusterHeight(d, viewMode) / 2 + (d.isStart ? RING_GAP_END : RING_GAP));
 
     // like Bezier curve
     const linkGenerator = d3.linkHorizontal().x(d => d.y).y(d => d.x);
@@ -318,6 +318,29 @@ function updateClusterLabels(viewMode, g, root) {
 }
 
 /**
+ * Creates the marker arrowhead definition used by start-node arrows
+ */
+function ensureStartArrowMarker(svg) {
+    let defs = svg.select("defs");
+    if (defs.empty()) {
+        defs = svg.append("defs");
+    }
+    defs.select("marker#start-arrowhead").remove();
+
+    defs.append("marker")
+        .attr("id", "start-arrowhead")
+        .attr("viewBox", "0 0 10 10")
+        .attr("refX", 9)
+        .attr("refY", 5)
+        .attr("markerWidth", 7)
+        .attr("markerHeight", 7)
+        .attr("orient", "auto-start-reverse")
+        .append("path")
+        .attr("d", "M0,0 L10,5 L0,10 z")
+        .style("fill", "context-stroke");
+}
+
+/**
  * Buils the whole graph from scratch. Creates the DOM elements and draws them
  */
 function renderTree(data, svg, g, zoomBehavior, viewMode) {
@@ -344,6 +367,8 @@ function renderTree(data, svg, g, zoomBehavior, viewMode) {
         .domain([0, maxUsage])
         .interpolator(d3.interpolateRgbBasis([getVar("--accent-hot"), getVar("--accent-cold")]));
 
+    ensureStartArrowMarker(svg);
+    
     g.append("g")
         .attr("class", "links")
         .selectAll("path")
@@ -370,10 +395,11 @@ function renderTree(data, svg, g, zoomBehavior, viewMode) {
         .attr("stroke", d => colorScale(d.usage));
 
     nodeGroup.filter(d => d.isStart)
-        .append("rect")
-        .attr("class", "cluster-ring cluster-ring-start")
-        .attr("fill", "none")
-        .attr("stroke", d => colorScale(d.usage));
+        .append("line")
+        .attr("class", "start-arrow")
+        .attr("stroke", d => colorScale(d.usage))
+        .attr("stroke-width", 2)
+        .attr("marker-end", "url(#start-arrowhead)")
 
     nodeGroup.filter(d => d.isEnd)
         .append("rect")
