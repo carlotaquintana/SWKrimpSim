@@ -12,15 +12,13 @@ import java.util.Comparator;
 public class SortCtFile {
 
     /**
-     * Reorders a Vreeken code table so that, in each pattern, items of
-     * type "TYPE" appear first, followed by the rest of the items.
+     * Reorders a Vreeken code table so that, in each pattern, following the ItemCategory order
      *
      * @param input The Vreeken code table (.ct)
      * @param output The reordered code table (.ct)
      * @param conversion The mapping from Vreeken item identifiers to original item identifiers
      * @param translations The mapping from original item identifiers to their translation (uri, type)
      */
-
     public static void sortFile(Path input, Path output, Map<Integer,Integer> conversion, 
                                 Map<Integer, ItemTranslation> translations) throws IOException {
 
@@ -73,7 +71,7 @@ public class SortCtFile {
     private static ItemCategory categoryOf(int vreeken, Map<Integer, ItemTranslation> translations) {
         ItemTranslation translation = translations.get(vreeken);
         String type = translation != null ? translation.getType() : null;
-        
+
         return ItemCategory.fromType(type);
     }
 }

@@ -19,6 +19,13 @@ public class Main {
 
     }
 
+    /**
+     * Reads a dataset's Vreeken code table, decodes it, optionally reorders it
+     * and filters it by item, builds the compacted graph, and writes the
+     * resulting JSON to results/<dataset>-output/.
+     * 
+     * @param args <dataset> [selectedItem] [--sorted], see printUsage()
+     */
     public static void main(String[] args) throws Exception {
 
         if (args.length < 1) {

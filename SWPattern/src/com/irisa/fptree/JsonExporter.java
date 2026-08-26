@@ -7,6 +7,14 @@ import java.util.*;
 
 public class JsonExporter {
 
+    /**
+     * Exports the FP-tree graph as JSON (nodes, links, patterns).
+     *
+     * @param root The virtual root node of the graph
+     * @param translations The mapping from original item identifiers to their translation (uri, type)
+     * @param conversion The mapping from Vreeken item identifiers to original item identifiers
+     * @param output The output JSON file
+     */
     public static void export(FPNode root, Map<Integer, ItemTranslation> translations, 
                                 Map<Integer, Integer> conversion, Path output) throws IOException {
 

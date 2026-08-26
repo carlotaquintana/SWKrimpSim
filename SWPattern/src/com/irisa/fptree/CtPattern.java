@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * A .ct pattern: items, usage and support.
+ */
 public class CtPattern {
     private List<Integer> items;
     private long usage;

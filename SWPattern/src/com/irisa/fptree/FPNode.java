@@ -2,6 +2,11 @@ package com.irisa.fptree;
 
 import java.util.*;
 
+/**
+ * A compacted node of the FP-tree graph: one or more items that always
+ * co-occur together as one block, with their usage, start/end role, and
+ * source .ct patterns.
+ */
 public class FPNode {
     private final List<Integer> items;
     private long usage;

@@ -11,6 +11,12 @@ import java.util.Arrays;
 
 public class IdxReader {
 
+    /**
+     * Reads the item translations from a .idx file: each line has the item's
+     * URI tokens, its type, and its original.
+     *
+     * @param idxFile The index file (.idx)
+     */
     public static Map<Integer, ItemTranslation> readTranslationsFromFile(Path idxFile) throws IOException {
         
         Map<Integer, ItemTranslation> translations = new HashMap<>();

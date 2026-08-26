@@ -9,6 +9,12 @@ import java.util.List;
 
 public class CtReader {
 
+    /**
+     * Reads the patterns from a .ct file, skipping its 2-line Vreeken header.
+     * Each line is a list of item ids followed by a "(usage,support)" token.
+     *
+     * @param filePath The .ct file
+     */
     public static List<CtPattern> readPatternsFromFile(Path filePath) throws IOException {
 
         List<CtPattern> patterns = new ArrayList<>();

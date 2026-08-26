@@ -11,6 +11,14 @@ public class FPTreeBuilder {
         return maxSupport;
     }
 
+    /**
+     * Builds a compacted graph from a code table: merges chains of items that
+     * always co-occur into single blocks, links blocks across pattern
+     * transitions, and marks each block's start/end role and usage.
+     *
+     * @param patterns The .ct patterns to build the graph from
+     * @param selectedItem The item to filter by, or null to use all patterns
+     */
     public FPNode build(List<CtPattern> patterns, Integer selectedItem) {
 
         if (selectedItem != null) {
