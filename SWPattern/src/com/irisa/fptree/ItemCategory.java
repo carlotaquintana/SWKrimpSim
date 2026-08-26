@@ -8,8 +8,8 @@ public enum ItemCategory {
 
     TYPE,
     IN_PROPERTY, 
-    OUT_PROPERTY, 
     IN_NEIGHBOUR_TYPE,
+    OUT_PROPERTY, 
     OUT_NEIGHBOUR_TYPE,
     OTHER;
 

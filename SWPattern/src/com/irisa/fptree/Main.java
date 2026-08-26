@@ -16,7 +16,6 @@ public class Main {
         System.err.println("  <dataset>       required, dataset name (results/<dataset>-output)");
         System.err.println("  [selectedItem]  optional, filters the graph by this item; if omitted, the full graph is built");
         System.err.println("  [--sorted]      optional, reorders each pattern (TYPE items first) before building the graph");
-
     }
 
     /**
