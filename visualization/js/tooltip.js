@@ -59,7 +59,6 @@ function renderPatterns(d) {
             ? (d.details ? d.details.map(det => det.originalItem ?? "?") : (d.nodeItems ?? d.items ?? []))
             : (d.nodeItems ?? d.items ?? [])
     );
-
  
     return d.patterns.map(pattern => {
         const color = colorScale ? colorScale(pattern.usage) : "#ffffff"
