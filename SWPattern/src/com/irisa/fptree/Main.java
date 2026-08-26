@@ -11,12 +11,20 @@ import java.util.Map;
 
 public class Main {
 
+    private static void printUsage() {
+        System.err.println("Usage: java -jar FPTreeBuilder.jar <dataset> [selectedItem] [--sorted]");
+        System.err.println("  <dataset>       required, dataset name (results/<dataset>-output)");
+        System.err.println("  [selectedItem]  optional, filters the graph by this item; if omitted, the full graph is built");
+        System.err.println("  [--sorted]      optional, reorders each pattern (TYPE items first) before building the graph");
+
+    }
+
     public static void main(String[] args) throws Exception {
 
-        if (args.length > 2) {
-            System.err.println("Usage: selected item -> java -jar FPTreeBuilder.jar <dataset> <selectedItem>");
-            System.err.println("Usage: all items -> java -jar FPTreeBuilder.jar <dataset>");
+        if (args.length < 1) {
+            printUsage();
             System.exit(1);
+            return;
         }
 
         String dataset = args[0];
@@ -32,6 +40,7 @@ public class Main {
         Path analysis = resultsDir.resolve(dataset + ".db.analysis.txt");
         Path idx = resultsDir.resolve("conversionIndex.idx");
         Path ct_decoded = resultsDir.resolve("ct-decoded.ct");
+        Path ct_sorted = resultsDir.resolve("ct-sorted.ct");
  
         if (!Files.exists(ct)) {
             System.err.println("Error: missing file: " + ct);
@@ -42,6 +51,7 @@ public class Main {
         if (!Files.exists(analysis)) {
             System.err.println("Missing file: " + analysis);
             System.exit(1);
+            return;
         }
 
         if (!Files.exists(idx)) {
@@ -50,42 +60,56 @@ public class Main {
             return;
         }
 
-        final Integer selectedItem;
-        if (args.length == 1) {
-            selectedItem = null;
+        boolean sorted = false;
+        Integer selectedItemArg = null;
 
-        } else {
+        for (int i = 1; i < args.length; i++){
+            if (args[i].equals("--sorted")) {
+                sorted = true;
+                continue;
+            }
+
             try {
-                selectedItem = Integer.parseInt(args[1]);
+                selectedItemArg = Integer.parseInt(args[i]);
             } catch (NumberFormatException e) {
-                System.err.println("Error: the selected item must be an integer: \"" + args[1] + "\"");
+                System.err.println("Error: unrecognized argument \"" + args[i] + "\"");
+                printUsage();
                 System.exit(1);
                 return;
             }
         }
- 
+
+        final Integer selectedItem = selectedItemArg;
+
         try {
 
             Map<Integer,Integer> conversion = AnalysisReader.readConversionTable(analysis);
-            CtDecoder.decode(ct, ct_decoded, conversion);
-
-            System.out.println("Decoded code table written to:");
-            System.out.println(ct_decoded); 
-
-            List<CtPattern> patterns = CtReader.readPatternsFromFile(ct);
             Map<Integer, ItemTranslation> translations = IdxReader.readTranslationsFromFile(idx);
 
-            Path output;
-            if (selectedItem != null) {
-                output = resultsDir.resolve("fptree-" + selectedItem + ".json");
-                if (patterns.stream().noneMatch(p -> p.contains(selectedItem))) {
-                    System.err.println(
-                        "Warning: the selected item " + selectedItem + " is not present in any pattern.");
-                }
-            } else {
-                output = resultsDir.resolve("fptree-all.json");
+            CtDecoder.decode(ct, ct_decoded, conversion);
+            System.out.println("Decoded code table written to:");
+            System.out.println("    " + ct_decoded + "\n"); 
+
+            Path ctToUse = ct;
+            if (sorted) {
+                SortCtFile.sortFile(ct, ct_sorted, conversion, translations);
+                System.out.println("Sorted code table written to:");
+                System.out.println("    " + ct_sorted + "\n");
+                ctToUse = ct_sorted;
             }
- 
+
+            List<CtPattern> patterns = CtReader.readPatternsFromFile(ctToUse);
+            String outputName = "fptree-" + (selectedItem != null ? selectedItem : "all") + 
+                                (sorted ? "-sorted" : "") + ".json";
+
+            if (selectedItem != null && (patterns.stream().noneMatch(p -> p.contains(selectedItem)))) {
+                System.err.println("Error: the selected item " + selectedItem + " is not present in any pattern.");
+                System.exit(1);
+                return;
+            }
+            
+            Path output = resultsDir.resolve(outputName);
+
             FPTreeBuilder builder = new FPTreeBuilder();
             FPNode root = builder.build(patterns, selectedItem);
  

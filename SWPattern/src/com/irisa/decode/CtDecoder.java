@@ -22,11 +22,16 @@ public class CtDecoder {
         List<String> lines = Files.readAllLines(input);
         BufferedWriter writer = Files.newBufferedWriter(output);
 
-        for(int i=2;i<lines.size();i++) {
-
+        for(int i=0; i<lines.size(); i++) {
             String line = lines.get(i).trim();
 
             if(line.isEmpty()) continue;
+
+            if (i < 2) {
+                writer.write(line);
+                writer.newLine();
+                continue;
+            }
 
             StringBuilder out = new StringBuilder();
             String[] tokens = line.split("\\s+");
@@ -42,7 +47,7 @@ public class CtDecoder {
                 j++;
             }
 
-            // Copy the pattern
+            // Copy (usage,support)
             while(j<tokens.length) {
                 out.append(tokens[j]);
                 out.append(" ");
