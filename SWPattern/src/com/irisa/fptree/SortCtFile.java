@@ -12,7 +12,7 @@ import java.util.Comparator;
 public class SortCtFile {
 
     /**
-     * Reorders a Vreeken code table so that, in each pattern, following the ItemCategory order
+     * Reorders a Vreeken code table so that, in each pattern, following the ItemCategory order.
      *
      * @param input The Vreeken code table (.ct)
      * @param output The reordered code table (.ct)

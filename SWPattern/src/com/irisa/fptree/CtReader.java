@@ -10,7 +10,7 @@ import java.util.List;
 public class CtReader {
 
     /**
-     * Reads the patterns from a .ct file, skipping its 2-line Vreeken header.
+     * Reads the patterns from a .ct file.
      * Each line is a list of item ids followed by a "(usage,support)" token.
      *
      * @param filePath The .ct file
